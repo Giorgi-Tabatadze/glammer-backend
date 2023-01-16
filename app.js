@@ -1,13 +1,13 @@
 require("dotenv").config();
-const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-const logger = require("morgan");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const errorHandler = require("./middleware/errorHandler");
 const connectDB = require("./config/dbConn");
 const corsOption = require("./config/corsOptions");
+const { logEvents, logger } = require("./middleware/logger");
 
 const PORT = process.env.PORT || 3500;
 
@@ -19,7 +19,7 @@ app.set("view engine", "pug");
 
 connectDB();
 
-app.use(logger("dev"));
+app.use(logger);
 app.use(cors(corsOption));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -30,20 +30,18 @@ const indexRouter = require("./routes/root");
 
 app.use("/", indexRouter);
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
+app.all("*", (req, res) => {
+  res.status(404);
+  if (req.accepts("html")) {
+    res.sendFile(path.join(__dirname, "views", "404.html"));
+  } else if (req.accepts("json")) {
+    res.json({ message: "404 Not Found" });
+  } else {
+    res.type("txt").send("404 Not Found");
+  }
 });
 
-// error handler
-app.use(function (err, req, res) {
-  console.log(err.stack);
-
-  const status = res.statusCode ? res.statusCode : 500; // server error
-  res.status(status);
-
-  res.json({ message: err.message, isError: true });
-});
+app.use(errorHandler);
 
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
@@ -51,6 +49,10 @@ mongoose.connection.once("open", () => {
 });
 mongoose.connection.on("error", (err) => {
   console.log(err);
+  logEvents(
+    `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`,
+    "mongoErrLog.log",
+  );
 });
 
 module.exports = app;
