@@ -76,42 +76,29 @@ const updateUser = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "User not found" });
   }
 
-  // Check for duplicate
-
-  const duplicate = await User.findOne({ username })
-    .collation({ locale: "en", strength: 2 })
-    .lean()
-    .exec();
-  // Allow upates to the original user
-  if (duplicate && duplicate?._id.toString() !== id) {
-    return res.status(409).json({ message: "Duplicate username" });
-  }
-
   if (username) {
+    // Check for duplicate
+
+    const duplicate = await User.findOne({ username })
+      .collation({ locale: "en", strength: 2 })
+      .lean()
+      .exec();
+    // Allow upates to the original user
+    if (duplicate && duplicate?._id.toString() !== id) {
+      return res.status(409).json({ message: "Duplicate username" });
+    }
     user.username = username;
-  }
-  if (roles) {
-    user.roles = roles;
   }
   if (password) {
     // Hash password
     user.password = await bcrypt.hash(password, 10); // salt rounds
   }
-  if (firstname) {
-    user.firstname = firstname;
-  }
-  if (lastname) {
-    user.lastname = lastname;
-  }
-  if (telephone) {
-    user.telephone = telephone;
-  }
-  if (city) {
-    user.city = city;
-  }
-  if (address) {
-    user.address = address;
-  }
+  user.roles = roles;
+  user.firstname = firstname;
+  user.lastname = lastname;
+  user.telephone = telephone;
+  user.city = city;
+  user.address = address;
 
   const updatedUser = await user.save();
 

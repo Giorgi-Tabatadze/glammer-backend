@@ -118,29 +118,13 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
     product.productcode = productcode;
   }
-  if (instagramurl) {
-    product.instagramurl = instagramurl;
-  }
-  if (thumbnail) {
-    product.thumbnail = thumbnail;
-  }
-  if (images) {
-    if (!Array.isArray(images))
-      return res.status(400).json({ message: "Images data must be an array" });
-    product.images = images;
-  }
-  if (price) {
-    product.price = price;
-  }
-  if (taobaoprice) {
-    product.taobaoprice = taobaoprice;
-  }
-  if (taobaoshippingprice) {
-    product.taobaoshippingprice = taobaoshippingprice;
-  }
-  if (taobaolink) {
-    product.taobaolink = taobaolink;
-  }
+  product.instagramurl = instagramurl;
+  product.thumbnail = thumbnail;
+  product.images = images;
+  product.price = price;
+  product.taobaoprice = taobaoprice;
+  product.taobaoshippingprice = taobaoshippingprice;
+  product.taobaolink = taobaolink;
 
   await product.save();
 
