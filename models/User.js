@@ -14,10 +14,6 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: ["customer"],
     },
-    active: {
-      type: Boolean,
-      default: true,
-    },
     firstname: {
       type: String,
     },

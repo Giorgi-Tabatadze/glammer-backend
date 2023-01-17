@@ -9,7 +9,6 @@ const ProductInstance = new mongoose.Schema(
     },
     tracking: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: "Tracking",
     },
     size: {

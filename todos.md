@@ -10,3 +10,8 @@ Keep In mind
 1. [ ] data scraper with instagram app
 2. [ ] oauth with instagram app instead of custom solution
 3. [ ] scraping data from space cargo website
+
+AS YOU DEVELOP
+
+1. [ ] check that items which are being deleted and are dependencies are not
+       getting deleted
