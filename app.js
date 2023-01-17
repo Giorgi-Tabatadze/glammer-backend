@@ -29,10 +29,12 @@ app.use(express.static(path.join(__dirname, "public")));
 const indexRouter = require("./routes/root");
 const usersRouter = require("./routes/userRoutes");
 const productsRouter = require("./routes/productRoutes");
+const trackingsRouter = require("./routes/trackingRoutes");
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
+app.use("/trackings", trackingsRouter);
 
 app.all("*", (req, res) => {
   res.status(404);

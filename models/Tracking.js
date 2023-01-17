@@ -4,9 +4,11 @@ const TrackingSchema = new mongoose.Schema(
   {
     scaccount: {
       type: String,
+      required: true,
     },
-    trackingnumber: {
+    trackingcode: {
       type: String,
+      required: true,
     },
     status: {
       type: String,
@@ -14,7 +16,7 @@ const TrackingSchema = new mongoose.Schema(
     declared: {
       type: Boolean,
     },
-    decraledfunds: {
+    declaredfunds: {
       type: Number,
     },
     sentdate: {
