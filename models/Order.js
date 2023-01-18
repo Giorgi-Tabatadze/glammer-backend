@@ -19,20 +19,22 @@ const OrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    firstname: {
-      type: String,
-    },
-    lastname: {
-      type: String,
-    },
-    telephone: {
-      type: String,
-    },
-    city: {
-      type: String,
-    },
-    address: {
-      type: String,
+    alternativeaddress: {
+      firstname: {
+        type: String,
+      },
+      lastname: {
+        type: String,
+      },
+      telephone: {
+        type: String,
+      },
+      city: {
+        type: String,
+      },
+      address: {
+        type: String,
+      },
     },
     customernote: {
       type: String,

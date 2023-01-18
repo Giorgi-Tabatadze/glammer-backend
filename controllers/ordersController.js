@@ -40,18 +40,14 @@ const createNewOrder = asyncHandler(async (req, res) => {
     user,
     productinstances,
     fundsdeposited,
-    firstname,
-    lastname,
-    telephone,
-    city,
-    address,
+    alternativeaddress,
     customernote,
     staffnote,
   } = req.body;
 
   /// /  VALIDATION START  ///////////////////////////
 
-  if (!fundsdeposited) {
+  if (!fundsdeposited && fundsdeposited !== 0) {
     return res.status(400).json({
       message: "Funds deposited is required",
     });
@@ -124,56 +120,24 @@ const createNewOrder = asyncHandler(async (req, res) => {
   orderObject.customernote = customernote;
   orderObject.staffnote = staffnote;
 
-  if (firstname) {
-    if (foundUser?.firstname) {
-      if (foundUser?.firstname.toLowerCase() !== firstname.toLowerCase()) {
-        orderObject.firstname = firstname;
-      }
-    } else {
-      foundUser.firstname = firstname;
+  if (alternativeaddress) {
+    if (
+      !alternativeaddress?.firstname ||
+      !alternativeaddress?.lastname ||
+      !alternativeaddress?.telephone ||
+      !alternativeaddress?.city ||
+      !alternativeaddress?.address
+    ) {
+      return res.status(400).json({
+        message: "Alternative Address must include all fields",
+      });
     }
-  }
-  if (lastname) {
-    if (foundUser?.lastname) {
-      if (foundUser?.lastname.toLowerCase() !== lastname.toLowerCase()) {
-        orderObject.lastname = lastname;
-      }
-    } else {
-      foundUser.lastname = lastname;
-    }
-  }
-  if (telephone) {
-    if (foundUser?.telephone) {
-      if (foundUser?.telephone !== telephone) {
-        orderObject.telephone = telephone;
-      }
-    } else {
-      foundUser.telephone = telephone;
-    }
-  }
-  if (city) {
-    if (foundUser?.city) {
-      if (foundUser?.city.toLowerCase() !== city.toLowerCase()) {
-        orderObject.city = city;
-      }
-    } else {
-      foundUser.city = city;
-    }
-  }
-  if (address) {
-    if (foundUser?.address) {
-      if (foundUser?.address.toLowerCase() !== address.toLowerCase()) {
-        orderObject.address = address;
-      }
-    } else {
-      foundUser.address = address;
-    }
+    orderObject.alternativeaddress = alternativeaddress;
   }
 
   // create and store new Order
 
-  await foundUser.save().exec();
-  const order = await Order.create(orderObject).exec();
+  const order = await Order.create(orderObject);
 
   if (order) {
     // Created
@@ -192,11 +156,7 @@ const updateOrder = asyncHandler(async (req, res) => {
     user,
     productinstances,
     fundsdeposited,
-    firstname,
-    lastname,
-    telephone,
-    city,
-    address,
+    alternativeaddress,
     customernote,
     staffnote,
   } = req.body;
@@ -269,60 +229,19 @@ const updateOrder = asyncHandler(async (req, res) => {
   if (fundsdeposited) {
     order.fundsdeposited = fundsdeposited;
   }
-  if (firstname) {
-    if (foundUser?.firstname) {
-      if (foundUser?.firstname.toLowerCase() !== firstname.toLowerCase()) {
-        order.firstname = firstname;
-      } else {
-        order.firstname = undefined;
-      }
-    } else {
-      foundUser.firstname = firstname;
+  if (alternativeaddress) {
+    if (
+      !alternativeaddress?.firstname ||
+      !alternativeaddress?.lastname ||
+      !alternativeaddress?.telephone ||
+      !alternativeaddress?.city ||
+      !alternativeaddress?.address
+    ) {
+      return res.status(400).json({
+        message: "Alternative Address must include all fields",
+      });
     }
-  }
-  if (lastname) {
-    if (foundUser?.lastname) {
-      if (foundUser?.lastname.toLowerCase() !== lastname.toLowerCase()) {
-        order.lastname = lastname;
-      } else {
-        order.lastname = undefined;
-      }
-    } else {
-      foundUser.lastname = lastname;
-    }
-  }
-  if (telephone) {
-    if (foundUser?.telephone) {
-      if (foundUser?.telephone !== telephone) {
-        order.telephone = telephone;
-      } else {
-        order.telephone = undefined;
-      }
-    } else {
-      foundUser.telephone = telephone;
-    }
-  }
-  if (city) {
-    if (foundUser?.city) {
-      if (foundUser?.city.toLowerCase() !== city.toLowerCase()) {
-        order.city = city;
-      } else {
-        order.city = undefined;
-      }
-    } else {
-      foundUser.city = city;
-    }
-  }
-  if (address) {
-    if (foundUser?.address) {
-      if (foundUser?.address.toLowerCase() !== address.toLowerCase()) {
-        order.address = address;
-      } else {
-        order.address = undefined;
-      }
-    } else {
-      foundUser.address = address;
-    }
+    order.alternativeaddress = alternativeaddress;
   }
 
   order.customernote = customernote;
