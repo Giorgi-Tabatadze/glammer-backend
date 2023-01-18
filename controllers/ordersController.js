@@ -62,7 +62,7 @@ const createNewOrder = asyncHandler(async (req, res) => {
       message: "Client-User is required to create Order",
     });
   }
-  const foundUser = await User.findById(user).select("-password").lean().exec();
+  const foundUser = await User.findById(user).exec();
 
   if (!foundUser) {
     return res.status(400).json({
@@ -125,34 +125,55 @@ const createNewOrder = asyncHandler(async (req, res) => {
   orderObject.staffnote = staffnote;
 
   if (firstname) {
-    orderObject.firstname = firstname;
-  } else {
-    orderObject.firstname = foundUser?.firstname;
+    if (foundUser?.firstname) {
+      if (foundUser?.firstname.toLowerCase() !== firstname.toLowerCase()) {
+        orderObject.firstname = firstname;
+      }
+    } else {
+      foundUser.firstname = firstname;
+    }
   }
   if (lastname) {
-    orderObject.lastname = lastname;
-  } else {
-    orderObject.lastname = foundUser?.lastname;
+    if (foundUser?.lastname) {
+      if (foundUser?.lastname.toLowerCase() !== lastname.toLowerCase()) {
+        orderObject.lastname = lastname;
+      }
+    } else {
+      foundUser.lastname = lastname;
+    }
   }
   if (telephone) {
-    orderObject.telephone = telephone;
-  } else {
-    orderObject.telephone = foundUser?.telephone;
+    if (foundUser?.telephone) {
+      if (foundUser?.telephone !== telephone) {
+        orderObject.telephone = telephone;
+      }
+    } else {
+      foundUser.telephone = telephone;
+    }
   }
   if (city) {
-    orderObject.city = city;
-  } else {
-    orderObject.city = foundUser?.city;
+    if (foundUser?.city) {
+      if (foundUser?.city.toLowerCase() !== city.toLowerCase()) {
+        orderObject.city = city;
+      }
+    } else {
+      foundUser.city = city;
+    }
   }
   if (address) {
-    orderObject.address = address;
-  } else {
-    orderObject.address = foundUser?.address;
+    if (foundUser?.address) {
+      if (foundUser?.address.toLowerCase() !== address.toLowerCase()) {
+        orderObject.address = address;
+      }
+    } else {
+      foundUser.address = address;
+    }
   }
 
   // create and store new Order
 
-  const order = await Order.create(orderObject);
+  await foundUser.save().exec();
+  const order = await Order.create(orderObject).exec();
 
   if (order) {
     // Created
@@ -189,8 +210,10 @@ const updateOrder = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Order not found" });
   }
 
+  let foundUser;
+
   if (user) {
-    const foundUser = await User.findById(user).select("-password").lean();
+    foundUser = await User.findById(user).exec();
 
     if (!foundUser) {
       return res.status(400).json({
@@ -198,6 +221,8 @@ const updateOrder = asyncHandler(async (req, res) => {
       });
     }
     order.user = user;
+  } else {
+    foundUser = await User.findById(order.user.toString()).exec();
   }
   if (productinstances) {
     if (hasDuplicates(productinstances)) {
@@ -245,23 +270,65 @@ const updateOrder = asyncHandler(async (req, res) => {
     order.fundsdeposited = fundsdeposited;
   }
   if (firstname) {
-    order.firstname = firstname;
+    if (foundUser?.firstname) {
+      if (foundUser?.firstname.toLowerCase() !== firstname.toLowerCase()) {
+        order.firstname = firstname;
+      } else {
+        order.firstname = undefined;
+      }
+    } else {
+      foundUser.firstname = firstname;
+    }
   }
   if (lastname) {
-    order.lastname = lastname;
+    if (foundUser?.lastname) {
+      if (foundUser?.lastname.toLowerCase() !== lastname.toLowerCase()) {
+        order.lastname = lastname;
+      } else {
+        order.lastname = undefined;
+      }
+    } else {
+      foundUser.lastname = lastname;
+    }
   }
   if (telephone) {
-    order.telephone = telephone;
+    if (foundUser?.telephone) {
+      if (foundUser?.telephone !== telephone) {
+        order.telephone = telephone;
+      } else {
+        order.telephone = undefined;
+      }
+    } else {
+      foundUser.telephone = telephone;
+    }
   }
   if (city) {
-    order.city = city;
+    if (foundUser?.city) {
+      if (foundUser?.city.toLowerCase() !== city.toLowerCase()) {
+        order.city = city;
+      } else {
+        order.city = undefined;
+      }
+    } else {
+      foundUser.city = city;
+    }
   }
   if (address) {
-    order.address = address;
+    if (foundUser?.address) {
+      if (foundUser?.address.toLowerCase() !== address.toLowerCase()) {
+        order.address = address;
+      } else {
+        order.address = undefined;
+      }
+    } else {
+      foundUser.address = address;
+    }
   }
+
   order.customernote = customernote;
   order.staffnote = staffnote;
 
+  await foundUser.save();
   await order.save();
 
   res.json({ message: `Order Updated` });

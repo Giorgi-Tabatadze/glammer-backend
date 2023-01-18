@@ -7,7 +7,7 @@ const Order = require("../models/Order");
 // @routes GET /users
 // @access Private
 const getAllUsers = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 20 } = req.query;
+  const { page = 1, limit = 0 } = req.query;
   const users = await User.find()
     .limit(limit * 1)
     .skip((page - 1) * limit)
