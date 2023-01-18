@@ -31,12 +31,14 @@ const usersRouter = require("./routes/userRoutes");
 const productsRouter = require("./routes/productRoutes");
 const trackingsRouter = require("./routes/trackingRoutes");
 const productInstanceRouter = require("./routes/productInstanceRoutes");
+const orderRouter = require("./routes/orderRoutes");
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
 app.use("/trackings", trackingsRouter);
 app.use("/productinstances", productInstanceRouter);
+app.use("/orders", orderRouter);
 
 app.all("*", (req, res) => {
   res.status(404);

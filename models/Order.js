@@ -8,7 +8,7 @@ const OrderSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
-    productintances: [
+    productinstances: [
       {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
@@ -17,6 +17,7 @@ const OrderSchema = new mongoose.Schema(
     ],
     fundsdeposited: {
       type: Number,
+      required: true,
     },
     firstname: {
       type: String,
