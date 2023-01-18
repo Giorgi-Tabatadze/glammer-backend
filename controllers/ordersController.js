@@ -20,7 +20,12 @@ function hasDuplicates(array) {
 // @routes GET /orders
 // @access Private
 const getAllOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find().lean();
+  const { page = 1, limit = 20 } = req.query;
+
+  const orders = await Order.find()
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
   if (!orders?.length) {
     return res.status(400).json({ message: "No orders found" });
   }

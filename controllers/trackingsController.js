@@ -6,7 +6,11 @@ const ProductInstance = require("../models/ProductInstance");
 // @routes GET /trackings
 // @access Private
 const getAllTrackings = asyncHandler(async (req, res) => {
-  const trackings = await Tracking.find().lean();
+  const { page = 1, limit = 20 } = req.query;
+  const trackings = await Tracking.find()
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
   if (!trackings?.length) {
     return res.status(400).json({ message: "No trackings found" });
   }

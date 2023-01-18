@@ -6,7 +6,11 @@ const ProductInstance = require("../models/ProductInstance");
 // @routes GET /products
 // @access Private
 const getAllProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find().lean();
+  const { page = 1, limit = 20 } = req.query;
+  const products = await Product.find()
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
   if (!products?.length) {
     return res.status(400).json({ message: "No products found" });
   }

@@ -8,7 +8,12 @@ const Order = require("../models/Order");
 // @routes GET /productInstances
 // @access Private
 const getAllProductInstances = asyncHandler(async (req, res) => {
-  const productInstances = await ProductInstance.find().lean();
+  const { page = 1, limit = 20 } = req.query;
+
+  const productInstances = await ProductInstance.find()
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
   if (!productInstances?.length) {
     return res.status(400).json({ message: "No productInstances found" });
   }

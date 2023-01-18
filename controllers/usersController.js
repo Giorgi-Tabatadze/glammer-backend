@@ -7,7 +7,12 @@ const Order = require("../models/Order");
 // @routes GET /users
 // @access Private
 const getAllUsers = asyncHandler(async (req, res) => {
-  const users = await User.find().select("-password").lean();
+  const { page = 1, limit = 20 } = req.query;
+  const users = await User.find()
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .select("-password")
+    .lean();
   if (!users?.length) {
     return res.status(400).json({ message: "No users found" });
   }
