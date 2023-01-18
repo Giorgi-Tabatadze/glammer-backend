@@ -144,7 +144,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
   const productInstance = await ProductInstance.findOne({ product: id })
     .lean()
     .exec();
-  if (productInstance?.length) {
+  if (productInstance) {
     return res.status(400).json({ message: "Product has ProductInstances" });
   }
 

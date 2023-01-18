@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Tracking = require("../models/Tracking");
-const ProductInstance = require("../models/Product");
+const ProductInstance = require("../models/ProductInstance");
 
 // @desc Get all Trackings
 // @routes GET /trackings
@@ -54,7 +54,7 @@ const createNewTracking = asyncHandler(async (req, res) => {
     trackingObject.declared = declared;
   }
   if (declaredfunds) {
-    trackingObject.declaredfunds = Number(declaredfunds);
+    trackingObject.declaredfunds = declaredfunds;
   }
   if (sentdate) {
     trackingObject.sentdate = sentdate;
@@ -138,7 +138,8 @@ const deleteTracking = asyncHandler(async (req, res) => {
   const productInstance = await ProductInstance.findOne({ tracking: id })
     .lean()
     .exec();
-  if (productInstance?.length) {
+
+  if (productInstance) {
     return res.status(400).json({ message: "Tracking has ProductInstance" });
   }
 
