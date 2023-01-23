@@ -11,11 +11,18 @@ const ProductInstance = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tracking",
     },
+    ordered: {
+      type: Boolean,
+      default: false,
+    },
     size: {
       type: String,
     },
     color: {
       type: String,
+    },
+    differentprice: {
+      type: Number,
     },
   },
   {

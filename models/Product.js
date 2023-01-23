@@ -4,6 +4,7 @@ const ProductSchema = new mongoose.Schema(
   {
     productcode: {
       type: String,
+      required: true,
     },
     instagramurl: {
       type: String,

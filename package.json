@@ -19,7 +19,10 @@
     "mongoose": "^6.8.3",
     "mongoose-sequence": "^5.3.1",
     "morgan": "~1.9.1",
+    "pg": "^8.8.0",
+    "pg-hstore": "^2.3.4",
     "pug": "2.0.0-beta11",
+    "sequelize": "^6.28.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

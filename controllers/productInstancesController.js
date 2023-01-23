@@ -24,7 +24,7 @@ const getAllProductInstances = asyncHandler(async (req, res) => {
 // @routes POST /productInstances
 // @access Private
 const createNewProductInstance = asyncHandler(async (req, res) => {
-  const { product, tracking, size, color } = req.body;
+  const { product, tracking, size, color, differentprice } = req.body;
 
   if (!product) {
     return res.status(400).json({
@@ -52,12 +52,9 @@ const createNewProductInstance = asyncHandler(async (req, res) => {
     }
     productInstanceObject.tracking = tracking;
   }
-  if (size) {
-    productInstanceObject.size = size;
-  }
-  if (color) {
-    productInstanceObject.color = color;
-  }
+  productInstanceObject.size = size;
+  productInstanceObject.color = color;
+  productInstanceObject.differentprice = differentprice;
 
   // create and store new ProductInstance
 
@@ -75,7 +72,8 @@ const createNewProductInstance = asyncHandler(async (req, res) => {
 // @routes PATCH /productInstances
 // @access Private
 const updateProductInstance = asyncHandler(async (req, res) => {
-  const { id, product, tracking, size, color } = req.body;
+  const { id, product, tracking, ordered, size, color, differentprice } =
+    req.body;
 
   if (!id) {
     return res.status(400).json({ message: "ID is required" });
@@ -108,8 +106,37 @@ const updateProductInstance = asyncHandler(async (req, res) => {
   productInstance.tracking = tracking;
   productInstance.size = size;
   productInstance.color = color;
+  productInstance.differentprice = differentprice;
 
-  await productInstance.save();
+  let updatedOrder = false;
+
+  if (ordered) {
+    const order = await Order.findOne({ productinstances: id })
+      .populate("productinstances")
+      .exec();
+    if (!order) {
+      return res
+        .status(400)
+        .json({ message: "ProductInstance is not assosiated with order" });
+    }
+    if (order.status === "created") {
+      let allOrdered = true;
+      order.productinstances.forEach((pI) => {
+        if (!pI.ordered && pI._id.toString() !== id) {
+          allOrdered = false;
+        }
+      });
+      if (allOrdered) {
+        order.status = "ordered";
+        updatedOrder = await order.save();
+      }
+    }
+  }
+  try {
+    await productInstance.save();
+  } catch (error) {
+    updatedOrder = await order.save();
+  }
 
   res.json({ message: `ProductInstance Updated` });
 });
@@ -124,7 +151,7 @@ const deleteProductInstance = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "ProductInstance ID Required" });
   }
 
-  const order = await Order.findOne({ productintances: id }).lean().exec();
+  const order = await Order.findOne({ productinstances: id }).lean().exec();
   if (order?.length) {
     return res.status(400).json({ message: "ProductInstance has orders" });
   }

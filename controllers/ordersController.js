@@ -40,6 +40,7 @@ const createNewOrder = asyncHandler(async (req, res) => {
     user,
     productinstances,
     fundsdeposited,
+    deliveryprice,
     alternativeaddress,
     customernote,
     staffnote,
@@ -117,6 +118,7 @@ const createNewOrder = asyncHandler(async (req, res) => {
   orderObject.user = user;
   orderObject.productinstances = productinstances;
   orderObject.fundsdeposited = fundsdeposited;
+  orderObject.deliveryprice = deliveryprice;
   orderObject.customernote = customernote;
   orderObject.staffnote = staffnote;
 
@@ -156,6 +158,7 @@ const updateOrder = asyncHandler(async (req, res) => {
     user,
     productinstances,
     fundsdeposited,
+    deliveryprice,
     alternativeaddress,
     customernote,
     staffnote,
@@ -228,6 +231,9 @@ const updateOrder = asyncHandler(async (req, res) => {
   }
   if (fundsdeposited) {
     order.fundsdeposited = fundsdeposited;
+  }
+  if (deliveryprice) {
+    order.deliveryprice = deliveryprice;
   }
   if (alternativeaddress) {
     if (

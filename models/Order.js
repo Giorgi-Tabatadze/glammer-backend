@@ -19,6 +19,10 @@ const OrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    deliveryprice: {
+      type: Number,
+      default: 5,
+    },
     alternativeaddress: {
       firstname: {
         type: String,
@@ -35,6 +39,18 @@ const OrderSchema = new mongoose.Schema(
       address: {
         type: String,
       },
+    },
+    status: {
+      type: String,
+      enum: [
+        "created",
+        "ordered",
+        "tracked",
+        "sent",
+        "delivered",
+        "other",
+        "canceled",
+      ],
     },
     customernote: {
       type: String,
