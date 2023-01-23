@@ -8,6 +8,7 @@ const errorHandler = require("./middleware/errorHandler");
 const connectDB = require("./config/dbConn");
 const corsOption = require("./config/corsOptions");
 const { logEvents, logger } = require("./middleware/logger");
+const db = require("./sqlmodels");
 
 const PORT = process.env.PORT || 3500;
 
@@ -18,6 +19,9 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
 connectDB();
+(async () => {
+  await db.sequelize.sync({ force: true });
+})();
 
 app.use(logger);
 app.use(cors(corsOption));
