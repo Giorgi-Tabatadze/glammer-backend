@@ -7,7 +7,10 @@ module.exports = (sequelize, DataTypes) => {
       username: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: {
+          arg: true,
+          msg: "username is already taken.",
+        },
         validate: {
           notNull: { msg: "username is required" },
         },
@@ -19,7 +22,6 @@ module.exports = (sequelize, DataTypes) => {
           notNull: { msg: "password is required" },
         },
       },
-
       role: {
         type: DataTypes.STRING,
         defaultValue: "customer",
@@ -30,9 +32,18 @@ module.exports = (sequelize, DataTypes) => {
       freezeTableName: true,
       hooks: {
         beforeCreate: async (scaccount) => {
-          const hashedPwd = await bcrypt.hash(scaccount.password, 10);
-          // eslint-disable-next-line no-param-reassign
-          scaccount.password = hashedPwd;
+          if (scaccount.password) {
+            const hashedPwd = await bcrypt.hash(scaccount.password, 10);
+            // eslint-disable-next-line no-param-reassign
+            scaccount.password = hashedPwd;
+          }
+        },
+        beforeUpdate: async (scaccount) => {
+          if (scaccount.password) {
+            const hashedPwd = await bcrypt.hash(scaccount.password, 10);
+            // eslint-disable-next-line no-param-reassign
+            scaccount.password = hashedPwd;
+          }
         },
       },
     },

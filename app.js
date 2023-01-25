@@ -36,6 +36,8 @@ const productsRouter = require("./routes/productRoutes");
 const trackingsRouter = require("./routes/trackingRoutes");
 const productInstanceRouter = require("./routes/productInstanceRoutes");
 const orderRouter = require("./routes/orderRoutes");
+const scaccountRouter = require("./routes/scaccountRoutes");
+const deliveryRouter = require("./routes/deliveryRoutes");
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
@@ -43,6 +45,8 @@ app.use("/products", productsRouter);
 app.use("/trackings", trackingsRouter);
 app.use("/productinstances", productInstanceRouter);
 app.use("/orders", orderRouter);
+app.use("/scaccounts", scaccountRouter);
+app.use("/deliveries", deliveryRouter);
 
 app.all("*", (req, res) => {
   res.status(404);

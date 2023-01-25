@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notNull: { msg: "trackingcode is required" },
         },
+        unique: {
+          arg: true,
+          msg: "trackingcode is already taken.",
+        },
       },
       status: DataTypes.STRING,
       declared: DataTypes.BOOLEAN,

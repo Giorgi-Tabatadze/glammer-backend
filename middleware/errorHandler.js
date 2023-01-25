@@ -7,7 +7,18 @@ const errorHandler = (err, req, res, next) => {
   );
   console.log(err.stack);
 
-  const status = res.statusCode ? res.statusCode : 500; // server error
+  let status;
+  switch (err.name) {
+    case "SequelizeValidationError":
+      status = 400;
+      break;
+    case "SequelizeUniqueConstraintError":
+      status = 409;
+      break;
+    default:
+      status = res.statusCode ? res.statusCode : 500; // server error
+      break;
+  }
   res.status(status);
 
   res.json({ message: err.message, isError: true });
