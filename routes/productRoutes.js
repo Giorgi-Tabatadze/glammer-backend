@@ -1,13 +1,14 @@
 const express = require("express");
+const upload = require("../middleware/multerUpload");
 
 const router = express.Router();
-const productsController = require("../controllers/productsController");
+const sqlProdoctController = require("../sqlcontrollers/productsController");
 
 router
   .route("/")
-  .get(productsController.getAllProducts)
-  .post(productsController.createNewProduct)
-  .patch(productsController.updateProduct)
-  .delete(productsController.deleteProduct);
+  .get(sqlProdoctController.getAllProducts)
+  .post(upload, sqlProdoctController.createNewProduct)
+  .patch(upload, sqlProdoctController.updateProduct)
+  .delete(sqlProdoctController.deleteProduct);
 
 module.exports = router;

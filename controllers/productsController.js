@@ -32,6 +32,11 @@ const createNewProduct = asyncHandler(async (req, res) => {
     taobaolink,
   } = req.body;
 
+  console.log(req.file);
+  if (req.fileUploadError) {
+    res.status(400).json({ message: req.fileUploadError.msg });
+  }
+
   if (!productcode) {
     return res.status(400).json({ message: "Product Code Required" });
   }

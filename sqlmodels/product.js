@@ -5,13 +5,29 @@ module.exports = (sequelize, DataTypes) => {
       productCode: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: {
+          arg: true,
+          msg: "productcode is already taken.",
+        },
         validate: {
           notNull: { msg: "productcode is required" },
         },
       },
 
-      thumbnail: DataTypes.STRING,
-      price: DataTypes.DECIMAL,
+      thumbnail: {
+        type: DataTypes.STRING,
+        get() {
+          const rawValue = this.getDataValue("thumbnail");
+          return rawValue ? `public/images/${rawValue}` : null;
+        },
+      },
+      price: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "price is required" },
+        },
+      },
       taobaoPrice: DataTypes.DECIMAL,
       taobaoShippingPrice: DataTypes.DECIMAL,
       taobaoUrl: DataTypes.STRING,

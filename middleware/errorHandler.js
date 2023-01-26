@@ -1,3 +1,4 @@
+const fs = require("fs");
 const { logEvents } = require("./logger");
 
 const errorHandler = (err, req, res, next) => {
@@ -22,6 +23,15 @@ const errorHandler = (err, req, res, next) => {
   res.status(status);
 
   res.json({ message: err.message, isError: true });
+  if (req?.file?.path) {
+    fs.unlink(req.file.path, (error) => {
+      if (error) {
+        console.log(err.stack);
+      } else {
+        console.log("uploaded file deleted due to error");
+      }
+    });
+  }
 };
 
 module.exports = errorHandler;

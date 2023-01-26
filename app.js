@@ -21,6 +21,7 @@ app.set("view engine", "pug");
 connectDB();
 (async () => {
   await db.sequelize.sync({ force: true });
+  console.log("connected to Postgress erver");
 })();
 
 app.use(logger);
