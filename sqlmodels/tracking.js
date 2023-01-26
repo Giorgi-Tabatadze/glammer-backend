@@ -2,7 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const Tracking = sequelize.define(
     "tracking",
     {
-      trackingcode: {
+      trackingCode: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
