@@ -24,121 +24,57 @@ const getAllProductInstances = asyncHandler(async (req, res) => {
 // @routes POST /productInstances
 // @access Private
 const createNewProductInstance = asyncHandler(async (req, res) => {
-  const { product, tracking, size, color, differentprice } = req.body;
+  const {
+    ordered,
+    size,
+    color,
+    differentprice,
+    orderId,
+    productId,
+    trackingId,
+  } = req.body;
 
-  if (!product) {
-    return res.status(400).json({
-      message: "Product is required to create ProductInstance",
-    });
-  }
-  const foundProduct = await Product.findById(product).lean();
+  const productInstanceObject = {
+    ordered,
+    size,
+    color,
+    differentprice,
+    orderId,
+    productId,
+    trackingId,
+  };
+  await ProductInstance.create(productInstanceObject);
 
-  if (!foundProduct) {
-    return res.status(400).json({
-      message: "Invalid Product ID",
-    });
-  }
-
-  const productInstanceObject = {};
-
-  productInstanceObject.product = product;
-
-  if (tracking) {
-    const trackingFound = await Tracking.findById(tracking).lean();
-    if (!trackingFound) {
-      return res.status(400).json({
-        message: "Invalid Tracking ID",
-      });
-    }
-    productInstanceObject.tracking = tracking;
-  }
-  productInstanceObject.size = size;
-  productInstanceObject.color = color;
-  productInstanceObject.differentprice = differentprice;
-
-  // create and store new ProductInstance
-
-  const productInstance = await ProductInstance.create(productInstanceObject);
-
-  if (productInstance) {
-    // Created
-    res.status(201).json({ message: `New ProductInstance created` });
-  } else {
-    res.status(400).json({ message: "Invalid ProductInstance data received" });
-  }
+  res.status(201);
+  res.json();
 });
 
 // @desc Update a ProductInstance
 // @routes PATCH /productInstances
 // @access Private
 const updateProductInstance = asyncHandler(async (req, res) => {
-  const { id, product, tracking, ordered, size, color, differentprice } =
+  const { id, ordered, size, color, differentprice, productId, trackingId } =
     req.body;
 
   if (!id) {
-    return res.status(400).json({ message: "ID is required" });
+    return res.status(400).json({ message: "id is required" });
   }
 
-  const productInstance = await ProductInstance.findById(id).exec();
-
+  const productInstance = ProductInstance.findByPk(id);
   if (!productInstance) {
-    return res.status(400).json({ message: "ProductInstance not found" });
+    return res.status(400).json({ message: "productInstance not found" });
   }
 
-  if (product) {
-    const foundProduct = await Product.findById(product).lean();
-
-    if (!foundProduct) {
-      return res.status(400).json({
-        message: "Invalid Product ID",
-      });
-    }
-    productInstance.product = product;
-  }
-  if (tracking) {
-    const trackingFound = await Tracking.findById(tracking).lean();
-    if (!trackingFound) {
-      return res.status(400).json({
-        message: "Invalid Tracking ID",
-      });
-    }
-  }
-  productInstance.tracking = tracking;
+  productInstance.ordered = ordered;
   productInstance.size = size;
   productInstance.color = color;
   productInstance.differentprice = differentprice;
+  productInstance.productId = productId;
+  productInstance.trackingId = trackingId;
 
-  let updatedOrder = false;
+  await productInstance.save();
 
-  if (ordered) {
-    const order = await Order.findOne({ productinstances: id })
-      .populate("productinstances")
-      .exec();
-    if (!order) {
-      return res
-        .status(400)
-        .json({ message: "ProductInstance is not assosiated with order" });
-    }
-    if (order.status === "created") {
-      let allOrdered = true;
-      order.productinstances.forEach((pI) => {
-        if (!pI.ordered && pI._id.toString() !== id) {
-          allOrdered = false;
-        }
-      });
-      if (allOrdered) {
-        order.status = "ordered";
-        updatedOrder = await order.save();
-      }
-    }
-  }
-  try {
-    await productInstance.save();
-  } catch (error) {
-    updatedOrder = await order.save();
-  }
-
-  res.json({ message: `ProductInstance Updated` });
+  res.json();
 });
 
 // @desc Delete a ProductInstance
@@ -148,27 +84,26 @@ const deleteProductInstance = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
   if (!id) {
-    return res.status(400).json({ message: "ProductInstance ID Required" });
+    return res.status(400).json({ message: "id is required" });
   }
 
-  const order = await Order.findOne({ productinstances: id }).lean().exec();
-  if (order?.length) {
-    return res.status(400).json({ message: "ProductInstance has orders" });
+  const result = await ProductInstance.destroy({
+    where: {
+      id,
+    },
+  });
+  if (!result) {
+    res.status(204);
+  } else {
+    res.status(200);
   }
 
-  const productInstance = await ProductInstance.findById(id).exec();
-
-  if (!productInstance) {
-    return res.status(400).json({ message: "ProductInstance not found" });
-  }
-
-  const result = await productInstance.deleteOne();
-
-  const reply = `ProductInstance with ID ${result._id} deleted`;
-
-  res.json(reply);
+  res.json();
 });
 
 module.exports = {
   getAllProductInstances,
+  createNewProductInstance,
+  updateProductInstance,
+  deleteProductInstance,
 };

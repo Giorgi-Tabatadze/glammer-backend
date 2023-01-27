@@ -1,14 +1,13 @@
 const express = require("express");
 
 const router = express.Router();
-const productsInstancesController = require("../controllers/productInstancesController");
 const sqlProductInstacesController = require("../sqlcontrollers/productInstancesController");
 
 router
   .route("/")
   .get(sqlProductInstacesController.getAllProductInstances)
-  .post(productsInstancesController.createNewProductInstance)
-  .patch(productsInstancesController.updateProductInstance)
-  .delete(productsInstancesController.deleteProductInstance);
+  .post(sqlProductInstacesController.createNewProductInstance)
+  .patch(sqlProductInstacesController.updateProductInstance)
+  .delete(sqlProductInstacesController.deleteProductInstance);
 
 module.exports = router;
