@@ -12,17 +12,24 @@ module.exports = (sequelize, DataTypes) => {
       deliveryPrice: { type: DataTypes.DECIMAL, defaultValue: 5 },
       status: {
         type: DataTypes.STRING,
-        isIn: [
-          [
-            "created",
-            "ordered",
-            "tracked",
-            "sent",
-            "delivered",
-            "other",
-            "canceled",
-          ],
-        ],
+        allowNull: false,
+        validate: {
+          notNull: { msg: "status is required" },
+          isIn: {
+            args: [
+              [
+                "created",
+                "ordered",
+                "tracked",
+                "sent",
+                "delivered",
+                "other",
+                "canceled",
+              ],
+            ],
+            msg: "invalid status",
+          },
+        },
       },
       customerNote: { type: DataTypes.TEXT },
       staffNote: { type: DataTypes.TEXT },

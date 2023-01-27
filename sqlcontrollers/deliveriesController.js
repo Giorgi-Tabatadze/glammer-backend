@@ -96,7 +96,7 @@ const deleteDelivery = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
   if (!id) {
-    return res.status(400).json({ message: "Delivery ID Required" });
+    return res.status(400).json({ message: "delivery ID Required" });
   }
   const result = await Delivery.destroy({
     where: {

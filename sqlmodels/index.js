@@ -43,13 +43,11 @@ db.models.User.belongsTo(db.models.Delivery, {
 
 // Order has one ALTERNATIVE DELIVERY
 db.models.Delivery.hasOne(db.models.Order, {
-  foreignKey: "alternativeDeliveryId",
-  onDelete: "RESTRICT",
+  foreignKey: { allowNull: true, name: "alternativeDeliveryId" },
   onUpdate: "CASCADE",
 });
 db.models.Order.belongsTo(db.models.Delivery, {
-  foreignKey: "alternativeDeliveryId",
-  onDelete: "RESTRICT",
+  foreignKey: { allowNull: true, name: "alternativeDeliveryId" },
   onUpdate: "CASCADE",
 });
 
