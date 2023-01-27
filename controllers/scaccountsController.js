@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const {
   models: { Scaccount },
-} = require("../sqlmodels");
+} = require("../models");
 
 // @desc Get all Scaccounts
 // @routes GET /scaccounts

@@ -1,33 +1,15 @@
-const mongoose = require("mongoose");
-
-const ProductInstance = new mongoose.Schema(
-  {
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "Product",
+module.exports = (sequelize, DataTypes) => {
+  const ProductInstance = sequelize.define(
+    "productinstance",
+    {
+      ordered: { type: DataTypes.BOOLEAN, defaultValue: false },
+      size: DataTypes.STRING,
+      color: DataTypes.STRING,
+      differentPrice: DataTypes.DECIMAL,
     },
-    tracking: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Tracking",
+    {
+      freezeTableName: true,
     },
-    ordered: {
-      type: Boolean,
-      default: false,
-    },
-    size: {
-      type: String,
-    },
-    color: {
-      type: String,
-    },
-    differentprice: {
-      type: Number,
-    },
-  },
-  {
-    timestamps: true,
-  },
-);
-
-module.exports = mongoose.model("ProductInstance", ProductInstance);
+  );
+  return ProductInstance;
+};

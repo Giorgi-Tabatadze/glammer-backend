@@ -1,13 +1,13 @@
 const express = require("express");
 
 const router = express.Router();
-const sqlOrdersController = require("../sqlcontrollers/ordersController");
+const ordersController = require("../controllers/ordersController");
 
 router
   .route("/")
-  .get(sqlOrdersController.getAllOrders)
-  .post(sqlOrdersController.createNewOrder)
-  .patch(sqlOrdersController.updateOrder)
-  .delete(sqlOrdersController.deleteOrder);
+  .get(ordersController.getAllOrders)
+  .post(ordersController.createNewOrder)
+  .patch(ordersController.updateOrder)
+  .delete(ordersController.deleteOrder);
 
 module.exports = router;

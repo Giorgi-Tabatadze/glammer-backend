@@ -1,7 +1,7 @@
 const express = require("express");
 
 const router = express.Router();
-const deliveriesController = require("../sqlcontrollers/deliveriesController");
+const deliveriesController = require("../controllers/deliveriesController");
 
 router
   .route("/")

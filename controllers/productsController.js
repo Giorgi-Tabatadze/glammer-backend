@@ -1,18 +1,22 @@
 const asyncHandler = require("express-async-handler");
-const Product = require("../models/Product");
-const ProductInstance = require("../models/ProductInstance");
+const fs = require("fs");
+const {
+  models: { Product },
+} = require("../models");
 
 // @desc Get all Products
 // @routes GET /products
 // @access Private
 const getAllProducts = asyncHandler(async (req, res) => {
   const { page = 1, limit = 20 } = req.query;
-  const products = await Product.find()
-    .limit(limit * 1)
-    .skip((page - 1) * limit)
-    .lean();
+  const offset = (page - 1) * limit;
+  const products = await Product.findAll({
+    limit,
+    offset,
+    where: {}, // conditions
+  });
   if (!products?.length) {
-    return res.status(400).json({ message: "No products found" });
+    return res.status(400).json({ message: "no products found" });
   }
   res.json(products);
 });
@@ -20,124 +24,85 @@ const getAllProducts = asyncHandler(async (req, res) => {
 // @desc Create new Product
 // @routes POST /products
 // @access Private
-const createNewProduct = asyncHandler(async (req, res) => {
+const createNewProduct = asyncHandler(async (req, res, next) => {
   const {
-    productcode,
-    instagramurl,
-    thumbnail,
-    images,
+    productCode,
     price,
     taobaoprice,
     taobaoshippingprice,
-    taobaolink,
+    taobaoUrl,
+    instagramUrl,
   } = req.body;
 
-  console.log(req.file);
-  if (req.fileUploadError) {
-    res.status(400).json({ message: req.fileUploadError.msg });
+  if (req?.fileUploadError) {
+    return res.status(400).json({ message: req.fileUploadError.msg });
   }
-
-  if (!productcode) {
-    return res.status(400).json({ message: "Product Code Required" });
-  }
-
-  const duplicate = await Product.findOne({ productcode })
-    .collation({ locale: "en", strength: 2 })
-    .lean()
-    .exec();
-
-  if (duplicate) {
-    return res.status(409).json({ message: "Duplicate Product Code" });
-  }
-
-  const productObject = {};
-
-  productObject.productcode = productcode;
-
-  if (instagramurl) {
-    productObject.instagramurl = instagramurl;
-  }
-  if (thumbnail) {
-    productObject.thumbnail = thumbnail;
-  }
-  if (images) {
-    if (!Array.isArray(images))
-      return res.status(400).json({ message: "Images data must be an array" });
-    productObject.images = images;
-  }
-  if (price) {
-    productObject.price = price;
-  }
-  if (taobaoprice) {
-    productObject.taobaoprice = taobaoprice;
-  }
-  if (taobaoshippingprice) {
-    productObject.taobaoshippingprice = taobaoshippingprice;
-  }
-  if (taobaolink) {
-    productObject.taobaolink = taobaolink;
-  }
-
-  // create and store new Product
-
-  const product = await Product.create(productObject);
-
-  if (product) {
-    // Created
-    res.status(201).json({ message: `New Product created` });
-  } else {
-    res.status(400).json({ message: "Invalid Product data received" });
-  }
+  const productObject = {
+    productCode,
+    price,
+    taobaoprice,
+    taobaoshippingprice,
+    taobaoUrl,
+    instagramUrl,
+    thumbnail: req?.file?.filename,
+  };
+  // create new Product
+  await Product.create(productObject);
+  res.status(201).json();
 });
 
 // @desc Update a Product
 // @routes PATCH /products
 // @access Private
-const updateProduct = asyncHandler(async (req, res) => {
+const updateProduct = asyncHandler(async (req, res, next) => {
   const {
     id,
-    productcode,
-    instagramurl,
-    thumbnail,
-    images,
+    productCode,
     price,
     taobaoprice,
     taobaoshippingprice,
-    taobaolink,
+    taobaoUrl,
+    instagramUrl,
   } = req.body;
+
+  if (req?.fileUploadError) {
+    return res.status(400).json({ message: req.fileUploadError.msg });
+  }
 
   if (!id) {
     return res.status(400).json({ message: "ID is required" });
   }
 
-  const product = await Product.findById(id).exec();
+  const product = await Product.findByPk(id);
 
   if (!product) {
-    return res.status(400).json({ message: "Product not found" });
+    return res.status(400).json({ message: "product not found" });
   }
 
-  if (productcode) {
-    const duplicate = await Product.findOne({ productcode })
-      .collation({ locale: "en", strength: 2 })
-      .lean()
-      .exec();
-
-    if (duplicate && duplicate?._id.toString() !== id) {
-      return res.status(409).json({ message: "Duplicate Product Code" });
-    }
-    product.productcode = productcode;
-  }
-  product.instagramurl = instagramurl;
-  product.thumbnail = thumbnail;
-  product.images = images;
+  product.productCode = productCode;
   product.price = price;
   product.taobaoprice = taobaoprice;
   product.taobaoshippingprice = taobaoshippingprice;
-  product.taobaolink = taobaolink;
+  product.taobaoUrl = taobaoUrl;
+  product.instagramUrl = instagramUrl;
 
+  const oldThumbnail = product.thumbnail;
+
+  if (req?.file?.filename) {
+    product.thumbnail = req?.file?.filename;
+  }
   await product.save();
 
-  res.json({ message: `Product Updated` });
+  if (oldThumbnail && req?.file?.filename) {
+    fs.unlink(oldThumbnail, (error) => {
+      if (error) {
+        console.log(error.stack);
+      } else {
+        console.log("oldthumbnail deleted due to update");
+      }
+    });
+  }
+  res.status(200).json();
 });
 
 // @desc Delete a Product
@@ -147,27 +112,20 @@ const deleteProduct = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
   if (!id) {
-    return res.status(400).json({ message: "Product ID Required" });
+    return res.status(400).json({ message: "product id Required" });
   }
 
-  const productInstance = await ProductInstance.findOne({ product: id })
-    .lean()
-    .exec();
-  if (productInstance) {
-    return res.status(400).json({ message: "Product has ProductInstances" });
+  const result = await Product.destroy({
+    where: {
+      id,
+    },
+  });
+  if (!result) {
+    res.status(204);
+  } else {
+    res.status(200);
   }
-
-  const product = await Product.findById(id).exec();
-
-  if (!product) {
-    return res.status(400).json({ message: "Product not found" });
-  }
-
-  const result = await product.deleteOne();
-
-  const reply = `Product with ID ${result._id} deleted`;
-
-  res.json(reply);
+  res.json();
 });
 
 module.exports = {

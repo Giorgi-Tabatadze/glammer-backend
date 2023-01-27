@@ -2,13 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
-const connectDB = require("./config/dbConn");
 const corsOption = require("./config/corsOptions");
 const { logEvents, logger } = require("./middleware/logger");
-const db = require("./sqlmodels");
+const db = require("./models");
 
 const PORT = process.env.PORT || 3500;
 
@@ -18,10 +16,19 @@ const app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
-connectDB();
 (async () => {
-  await db.sequelize.sync({ force: true });
-  console.log("connected to Postgress erver");
+  try {
+    await db.sequelize.authenticate();
+    console.log("Connection has been established successfully.");
+    app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
+  } catch (err) {
+    console.error("Unable to connect to the database:", err);
+    logEvents(
+      `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`,
+      "mongoErrLog.log",
+    );
+  }
+  await db.sequelize.sync();
 })();
 
 app.use(logger);
@@ -61,17 +68,5 @@ app.all("*", (req, res) => {
 });
 
 app.use(errorHandler);
-
-mongoose.connection.once("open", () => {
-  console.log("Connected to MongoDB");
-  app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
-});
-mongoose.connection.on("error", (err) => {
-  console.log(err);
-  logEvents(
-    `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`,
-    "mongoErrLog.log",
-  );
-});
 
 module.exports = app;

@@ -1,7 +1,7 @@
 const express = require("express");
 
 const router = express.Router();
-const scaccountsController = require("../sqlcontrollers/scaccountsController");
+const scaccountsController = require("../controllers/scaccountsController");
 
 router
   .route("/")

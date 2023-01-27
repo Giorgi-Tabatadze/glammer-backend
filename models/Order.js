@@ -1,73 +1,42 @@
-const mongoose = require("mongoose");
-const AutoIncrement = require("mongoose-sequence")(mongoose);
-
-const OrderSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
-    },
-    productinstances: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: "ProductInstance",
+module.exports = (sequelize, DataTypes) => {
+  const Order = sequelize.define(
+    "order",
+    {
+      fundsDeposited: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "fundsDeposited is required" },
+        },
       },
-    ],
-    fundsdeposited: {
-      type: Number,
-      required: true,
-    },
-    deliveryprice: {
-      type: Number,
-      default: 5,
-    },
-    alternativeaddress: {
-      firstname: {
-        type: String,
+      deliveryPrice: { type: DataTypes.DECIMAL, defaultValue: 5 },
+      status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "status is required" },
+          isIn: {
+            args: [
+              [
+                "created",
+                "ordered",
+                "tracked",
+                "sent",
+                "delivered",
+                "other",
+                "canceled",
+              ],
+            ],
+            msg: "invalid status",
+          },
+        },
       },
-      lastname: {
-        type: String,
-      },
-      telephone: {
-        type: String,
-      },
-      city: {
-        type: String,
-      },
-      address: {
-        type: String,
-      },
+      customerNote: { type: DataTypes.TEXT },
+      staffNote: { type: DataTypes.TEXT },
     },
-    status: {
-      type: String,
-      enum: [
-        "created",
-        "ordered",
-        "tracked",
-        "sent",
-        "delivered",
-        "other",
-        "canceled",
-      ],
+    {
+      freezeTableName: true,
     },
-    customernote: {
-      type: String,
-    },
-    staffnote: {
-      type: String,
-    },
-  },
-  {
-    timestamps: true,
-  },
-);
-
-OrderSchema.plugin(AutoIncrement, {
-  inc_field: "ordernumber",
-  id: "ordernumbers",
-  start_seq: 3000,
-});
-
-module.exports = mongoose.model("Order", OrderSchema);
+  );
+  return Order;
+};

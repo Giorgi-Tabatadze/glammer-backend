@@ -1,13 +1,13 @@
 const express = require("express");
 
 const router = express.Router();
-const sqlTrackingController = require("../sqlcontrollers/trackingsController");
+const trackingController = require("../controllers/trackingsController");
 
 router
   .route("/")
-  .get(sqlTrackingController.getAllTrackings)
-  .post(sqlTrackingController.createNewTracking)
-  .patch(sqlTrackingController.updateTracking)
-  .delete(sqlTrackingController.deleteTracking);
+  .get(trackingController.getAllTrackings)
+  .post(trackingController.createNewTracking)
+  .patch(trackingController.updateTracking)
+  .delete(trackingController.deleteTracking);
 
 module.exports = router;

@@ -1,18 +1,21 @@
 const asyncHandler = require("express-async-handler");
-const Tracking = require("../models/Tracking");
-const ProductInstance = require("../models/ProductInstance");
+const {
+  models: { Tracking },
+} = require("../models");
 
 // @desc Get all Trackings
 // @routes GET /trackings
 // @access Private
 const getAllTrackings = asyncHandler(async (req, res) => {
   const { page = 1, limit = 20 } = req.query;
-  const trackings = await Tracking.find()
-    .limit(limit * 1)
-    .skip((page - 1) * limit)
-    .lean();
+  const offset = (page - 1) * limit;
+  const trackings = await Tracking.findAll({
+    limit,
+    offset,
+    where: {}, // conditions
+  });
   if (!trackings?.length) {
-    return res.status(400).json({ message: "No trackings found" });
+    return res.status(400).json({ message: "no trackings found" });
   }
   res.json(trackings);
 });
@@ -22,61 +25,36 @@ const getAllTrackings = asyncHandler(async (req, res) => {
 // @access Private
 const createNewTracking = asyncHandler(async (req, res) => {
   const {
-    scaccount,
-    trackingcode,
+    scaccountId,
+    trackingCode,
     status,
     declared,
-    declaredfunds,
-    sentdate,
-    estimatedarrival,
+    declaredFunds,
+    sentDate,
+    estimatedArrival,
   } = req.body;
 
-  if (!trackingcode || !scaccount) {
-    return res
-      .status(400)
-      .json({ message: "Tracking Code and SC account required Required" });
+  if (!trackingCode) {
+    return res.status(400).json({ message: "trackingCode required" });
   }
-
-  const duplicate = await Tracking.findOne({ trackingcode })
-    .collation({ locale: "en", strength: 2 })
-    .lean()
-    .exec();
-
-  if (duplicate) {
-    return res.status(409).json({ message: "Duplicate Tracking Code" });
+  if (!scaccountId && !(scaccountId === 0)) {
+    return res.status(400).json({ message: "scaccountId required" });
   }
 
   const trackingObject = {};
 
-  trackingObject.scaccount = scaccount;
-  trackingObject.trackingcode = trackingcode;
+  trackingObject.scaccountId = scaccountId;
+  trackingObject.trackingCode = trackingCode;
+  trackingObject.status = status;
+  trackingObject.declared = declared;
+  trackingObject.declaredFunds = declaredFunds;
+  trackingObject.sentDate = sentDate;
+  trackingObject.estimatedArrival = estimatedArrival;
 
-  if (status) {
-    trackingObject.status = status;
-  }
-  if (declared) {
-    trackingObject.declared = declared;
-  }
-  if (declaredfunds) {
-    trackingObject.declaredfunds = declaredfunds;
-  }
-  if (sentdate) {
-    trackingObject.sentdate = sentdate;
-  }
-  if (estimatedarrival) {
-    trackingObject.estimatedarrival = estimatedarrival;
-  }
+  // create new Tracking
+  await Tracking.create(trackingObject);
 
-  // create and store new Tracking
-
-  const tracking = await Tracking.create(trackingObject);
-
-  if (tracking) {
-    // Created
-    res.status(201).json({ message: `New Tracking created` });
-  } else {
-    res.status(400).json({ message: "Invalid Tracking data received" });
-  }
+  res.status(201).json();
 });
 
 // @desc Update a Tracking
@@ -85,48 +63,36 @@ const createNewTracking = asyncHandler(async (req, res) => {
 const updateTracking = asyncHandler(async (req, res) => {
   const {
     id,
-    scaccount,
-    trackingcode,
+    scaccountId,
+    trackingCode,
     status,
     declared,
-    declaredfunds,
-    sentdate,
-    estimatedarrival,
+    declaredFunds,
+    sentDate,
+    estimatedArrival,
   } = req.body;
 
   if (!id) {
     return res.status(400).json({ message: "ID is required" });
   }
 
-  const tracking = await Tracking.findById(id).exec();
+  const tracking = await Tracking.findByPk(id);
 
   if (!tracking) {
-    return res.status(400).json({ message: "Tracking not found" });
+    return res.status(400).json({ message: "tracking not found" });
   }
 
-  if (trackingcode) {
-    const duplicate = await Tracking.findOne({ trackingcode })
-      .collation({ locale: "en", strength: 2 })
-      .lean()
-      .exec();
-
-    if (duplicate && duplicate?._id.toString() !== id) {
-      return res.status(409).json({ message: "Duplicate Tracking Code" });
-    }
-    tracking.trackingcode = trackingcode;
-  }
-  if (scaccount) {
-    tracking.scaccount = scaccount;
-  }
+  tracking.scaccountId = scaccountId;
+  tracking.trackingCode = trackingCode;
   tracking.status = status;
   tracking.declared = declared;
-  tracking.declaredfunds = declaredfunds;
-  tracking.sentdate = sentdate;
-  tracking.estimatedarrival = estimatedarrival;
+  tracking.declaredFunds = declaredFunds;
+  tracking.sentDate = sentDate;
+  tracking.estimatedArrival = estimatedArrival;
 
   await tracking.save();
 
-  res.json({ message: `Tracking Updated` });
+  res.json();
 });
 
 // @desc Delete a Tracking
@@ -136,28 +102,20 @@ const deleteTracking = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
   if (!id) {
-    return res.status(400).json({ message: "Tracking ID Required" });
+    return res.status(400).json({ message: "tracking id Required" });
   }
 
-  const productInstance = await ProductInstance.findOne({ tracking: id })
-    .lean()
-    .exec();
-
-  if (productInstance) {
-    return res.status(400).json({ message: "Tracking has ProductInstance" });
+  const result = await Tracking.destroy({
+    where: {
+      id,
+    },
+  });
+  if (!result) {
+    res.status(204);
+  } else {
+    res.status(200);
   }
-
-  const tracking = await Tracking.findById(id).exec();
-
-  if (!tracking) {
-    return res.status(400).json({ message: "Tracking not found" });
-  }
-
-  const result = await tracking.deleteOne();
-
-  const reply = `Tracking with ID ${result._id} deleted`;
-
-  res.json(reply);
+  res.json();
 });
 
 module.exports = {

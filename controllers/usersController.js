@@ -1,113 +1,77 @@
 const asyncHandler = require("express-async-handler");
-const bcrypt = require("bcrypt");
-const User = require("../models/User");
-const Order = require("../models/Order");
+const db = require("../models");
+const {
+  models: { User, Delivery },
+} = require("../models");
 
 // @desc Get all users
 // @routes GET /users
 // @access Private
 const getAllUsers = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 0 } = req.query;
-  const users = await User.find()
-    .limit(limit * 1)
-    .skip((page - 1) * limit)
-    .select("-password")
-    .lean();
-  if (!users?.length) {
-    return res.status(400).json({ message: "No users found" });
+  const { page = 1, limit = 20 } = req.query;
+  const offset = (page - 1) * limit;
+  const Users = await User.findAll({
+    limit,
+    offset,
+    where: {},
+    attributes: { exclude: ["password"] },
+    // conditions
+  });
+  if (!Users?.length) {
+    return res.status(400).json({ message: "no users found" });
   }
-  res.json(users);
+  return res.json(Users);
 });
 
 // @desc Create new user
 // @routes POST /users
 // @access Private
 const createNewUser = asyncHandler(async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
 
-  // Confirm data
-  if (!username || !password) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
+  const result = await db.sequelize.transaction(async (t) => {
+    const delivery = await Delivery.create({}, { transaction: t });
 
-  // Check for dublicate
-  const duplicate = await User.findOne({ username })
-    .collation({ locale: "en", strength: 2 })
-    .lean()
-    .exec();
+    await User.create(
+      {
+        username,
+        password,
+        role,
+        deliveryId: delivery.id,
+      },
+      { transaction: t },
+    );
+  });
 
-  if (duplicate) {
-    return res.status(409).json({ message: "Duplicate username" });
-  }
-  const hashedPwd = await bcrypt.hash(password, 10); // salt rounds
+  console.log(result);
 
-  const userObject = { username, password: hashedPwd };
-
-  // create and store new User
-
-  const user = await User.create(userObject);
-
-  if (user) {
-    // Created
-    res.status(201).json({ message: `New user ${username} created` });
-  } else {
-    res.status(400).json({ message: "Invalid user data received" });
-  }
+  res.status(201).json();
 });
 
 // @desc Update a user
 // @routes PATCH /users
 // @access Private
 const updateUser = asyncHandler(async (req, res) => {
-  const {
-    id,
-    username,
-    roles,
-    password,
-    firstname,
-    lastname,
-    telephone,
-    city,
-    address,
-  } = req.body;
+  const { id, username, password, role } = req.body;
 
   if (!id) {
     return res.status(400).json({ message: "ID is required" });
   }
 
-  const user = await User.findById(id).exec();
+  const user = await User.findByPk(id);
 
   if (!user) {
-    return res.status(400).json({ message: "User not found" });
+    return res.status(400).json({ message: "user not found" });
   }
-
-  if (username) {
-    // Check for duplicate
-
-    const duplicate = await User.findOne({ username })
-      .collation({ locale: "en", strength: 2 })
-      .lean()
-      .exec();
-    // Allow upates to the original user
-    if (duplicate && duplicate?._id.toString() !== id) {
-      return res.status(409).json({ message: "Duplicate username" });
-    }
-    user.username = username;
-  }
+  user.username = username;
   if (password) {
-    // Hash password
-    user.password = await bcrypt.hash(password, 10); // salt rounds
+    user.password = password;
   }
-  user.roles = roles;
-  user.firstname = firstname;
-  user.lastname = lastname;
-  user.telephone = telephone;
-  user.city = city;
-  user.address = address;
+  user.role = role;
 
-  const updatedUser = await user.save();
+  await user.save();
 
-  res.json({ message: `${updatedUser.username} Updated` });
+  res.json();
 });
 
 // @desc Delete a user
@@ -117,25 +81,19 @@ const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.body;
 
   if (!id) {
-    return res.status(400).json({ message: "User ID Required" });
+    return res.status(400).json({ message: "user ID Required" });
   }
-
-  const order = await Order.findOne({ user: id }).lean().exec();
-  if (order?.length) {
-    return res.status(400).json({ message: "User has Orders" });
+  const result = await User.destroy({
+    where: {
+      id,
+    },
+  });
+  if (!result) {
+    res.status(204);
+  } else {
+    res.status(200);
   }
-
-  const user = await User.findById(id).exec();
-
-  if (!user) {
-    return res.status(400).json({ message: "User not found" });
-  }
-
-  const result = await user.deleteOne();
-
-  const reply = `Username ${result.username} with ID ${result._id} deleted`;
-
-  res.json(reply);
+  res.json();
 });
 
 module.exports = {

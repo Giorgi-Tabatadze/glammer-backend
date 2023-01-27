@@ -1,34 +1,27 @@
-const mongoose = require("mongoose");
-
-const TrackingSchema = new mongoose.Schema(
-  {
-    scaccount: {
-      type: String,
-      required: true,
+module.exports = (sequelize, DataTypes) => {
+  const Tracking = sequelize.define(
+    "tracking",
+    {
+      trackingCode: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "trackingcode is required" },
+        },
+        unique: {
+          arg: true,
+          msg: "trackingcode is already taken.",
+        },
+      },
+      status: DataTypes.STRING,
+      declared: DataTypes.BOOLEAN,
+      declaredFunds: DataTypes.DECIMAL,
+      sentDate: DataTypes.DATEONLY,
+      estimatedArrival: DataTypes.DATEONLY,
     },
-    trackingcode: {
-      type: String,
-      required: true,
+    {
+      freezeTableName: true,
     },
-    status: {
-      type: String,
-    },
-    declared: {
-      type: Boolean,
-    },
-    declaredfunds: {
-      type: Number,
-    },
-    sentdate: {
-      type: Date,
-    },
-    estimatedarrival: {
-      type: Date,
-    },
-  },
-  {
-    timestamps: true,
-  },
-);
-
-module.exports = mongoose.model("Tracking", TrackingSchema);
+  );
+  return Tracking;
+};

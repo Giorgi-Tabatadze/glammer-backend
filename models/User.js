@@ -1,38 +1,52 @@
-const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
-const userSchema = new mongoose.Schema(
-  {
-    username: {
-      type: String,
-      required: true,
+module.exports = (sequelize, DataTypes) => {
+  const User = sequelize.define(
+    "user",
+    {
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: {
+          arg: true,
+          msg: "username is already taken.",
+        },
+        validate: {
+          notNull: { msg: "username is required" },
+        },
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "password is required" },
+        },
+      },
+      role: {
+        type: DataTypes.STRING,
+        defaultValue: "customer",
+        isIn: [["customer", "employee", "admin"]],
+      },
     },
-    password: {
-      type: String,
-      required: true,
+    {
+      freezeTableName: true,
+      hooks: {
+        beforeCreate: async (scaccount) => {
+          if (scaccount.password) {
+            const hashedPwd = await bcrypt.hash(scaccount.password, 10);
+            // eslint-disable-next-line no-param-reassign
+            scaccount.password = hashedPwd;
+          }
+        },
+        beforeUpdate: async (scaccount) => {
+          if (scaccount.password) {
+            const hashedPwd = await bcrypt.hash(scaccount.password, 10);
+            // eslint-disable-next-line no-param-reassign
+            scaccount.password = hashedPwd;
+          }
+        },
+      },
     },
-    roles: {
-      type: [String],
-      default: ["customer"],
-    },
-    firstname: {
-      type: String,
-    },
-    lastname: {
-      type: String,
-    },
-    telephone: {
-      type: String,
-    },
-    city: {
-      type: String,
-    },
-    address: {
-      type: String,
-    },
-  },
-  {
-    timestamps: true,
-  },
-);
-
-module.exports = mongoose.model("User", userSchema);
+  );
+  return User;
+};

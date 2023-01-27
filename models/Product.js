@@ -1,36 +1,41 @@
-const mongoose = require("mongoose");
+module.exports = (sequelize, DataTypes) => {
+  const Product = sequelize.define(
+    "product",
+    {
+      productCode: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: {
+          arg: true,
+          msg: "productcode is already taken.",
+        },
+        validate: {
+          notNull: { msg: "productcode is required" },
+        },
+      },
 
-const ProductSchema = new mongoose.Schema(
-  {
-    productcode: {
-      type: String,
-      required: true,
+      thumbnail: {
+        type: DataTypes.STRING,
+        get() {
+          const rawValue = this.getDataValue("thumbnail");
+          return rawValue ? `public/images/${rawValue}` : null;
+        },
+      },
+      price: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "price is required" },
+        },
+      },
+      taobaoPrice: DataTypes.DECIMAL,
+      taobaoShippingPrice: DataTypes.DECIMAL,
+      taobaoUrl: DataTypes.STRING,
+      instagramUrl: DataTypes.STRING,
     },
-    instagramurl: {
-      type: String,
+    {
+      freezeTableName: true,
     },
-    thumbnail: {
-      type: String,
-    },
-    images: {
-      type: [String],
-    },
-    price: {
-      type: Number,
-    },
-    taobaoprice: {
-      type: Number,
-    },
-    taobaoshippingprice: {
-      type: Number,
-    },
-    taobaolink: {
-      type: String,
-    },
-  },
-  {
-    timestamps: true,
-  },
-);
-
-module.exports = mongoose.model("Product", ProductSchema);
+  );
+  return Product;
+};
