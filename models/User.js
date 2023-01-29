@@ -1,4 +1,6 @@
+/* eslint-disable no-param-reassign */
 const bcrypt = require("bcrypt");
+const Sequelize = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
@@ -27,22 +29,27 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "customer",
         isIn: [["customer", "employee", "admin"]],
       },
+      publicId: {
+        type: DataTypes.UUID,
+        defaultValue: Sequelize.UUIDV4,
+      },
     },
     {
       freezeTableName: true,
       hooks: {
-        beforeCreate: async (scaccount) => {
-          if (scaccount.password) {
-            const hashedPwd = await bcrypt.hash(scaccount.password, 10);
-            // eslint-disable-next-line no-param-reassign
-            scaccount.password = hashedPwd;
+        beforeCreate: async (user) => {
+          if (user.password) {
+            const hashedPwd = await bcrypt.hash(user.password, 10);
+            user.password = hashedPwd;
+            user.username = user.username.toLowerCase();
           }
         },
-        beforeUpdate: async (scaccount) => {
-          if (scaccount.password) {
-            const hashedPwd = await bcrypt.hash(scaccount.password, 10);
+        beforeUpdate: async (user) => {
+          if (user.password) {
+            const hashedPwd = await bcrypt.hash(user.password, 10);
             // eslint-disable-next-line no-param-reassign
-            scaccount.password = hashedPwd;
+            user.password = hashedPwd;
+            user.username = user.username.toLowerCase();
           }
         },
       },

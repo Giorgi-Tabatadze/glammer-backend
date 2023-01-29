@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         get() {
           const rawValue = this.getDataValue("thumbnail");
-          return rawValue ? `public/images/${rawValue}` : null;
+          return rawValue ? `public/images/products/${rawValue}` : null;
         },
       },
       price: {
