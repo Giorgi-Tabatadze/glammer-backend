@@ -1,24 +1,57 @@
 /* eslint-disable no-plusplus */
 const asyncHandler = require("express-async-handler");
+const _ = require("lodash");
 const db = require("../models");
+const getOrderColumnFilters = require("./util/getOrderColumnFilters");
 const {
-  models: { Delivery, Order, ProductInstance },
+  models: { Delivery, Order, ProductInstance, Tracking, Product, User },
 } = require("../models");
+const getOrderColumnSorting = require("./util/getOrderColumnSorting");
 
 // @desc Get all Orders
 // @routes GET /orders
 // @access Private
 const getAllOrders = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 20 } = req.query;
-  const offset = (page - 1) * limit;
-  const orders = await Order.findAll({
+  const { page = 0, limit = 20, columnfilters, sorting } = req.query;
+
+  const offset = page * limit;
+
+  const sortingObject = getOrderColumnSorting(sorting);
+
+  const where = getOrderColumnFilters(columnfilters);
+
+  const orders = await Order.findAndCountAll({
+    distinct: true,
     limit,
     offset,
-    where: {}, // conditions
+    where: where.orderWhere,
+    include: [
+      {
+        model: User,
+        required: false,
+      },
+      {
+        model: ProductInstance,
+        as: "productinstances",
+        required: false,
+        where: where.productInstanceWhere,
+        include: [
+          {
+            model: Tracking,
+            required: where.trackingRequired,
+            where: where.trackingWhere,
+          },
+          {
+            model: Product,
+            required: where.productRequired,
+            where: where.productWhere,
+          },
+        ],
+      },
+    ],
+    order: [sortingObject],
   });
-  if (!orders?.length) {
-    return res.status(400).json({ message: "no orders found" });
-  }
+
   res.json(orders);
 });
 
@@ -177,6 +210,7 @@ const deleteOrder = asyncHandler(async (req, res) => {
   } else {
     await order.destroy();
   }
+  res.status(200);
   res.json();
 });
 

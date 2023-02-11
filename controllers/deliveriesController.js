@@ -54,35 +54,26 @@ const createNewDelivery = asyncHandler(async (req, res) => {
 const updateDelivery = asyncHandler(async (req, res) => {
   const { id, firstname, lastname, telephone, city, address } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ message: "ID is required" });
-  }
-  if (!firstname) {
-    return res.status(400).json({ message: "firstname is required" });
-  }
-  if (!lastname) {
-    return res.status(400).json({ message: "lastname is required" });
-  }
-  if (!telephone) {
-    return res.status(400).json({ message: "telephone is required" });
-  }
-  if (!city) {
-    return res.status(400).json({ message: "city is required" });
-  }
-  if (!address) {
-    return res.status(400).json({ message: "address is required" });
-  }
-
   const delivery = await Delivery.findByPk(id);
 
   if (!delivery) {
     return res.status(400).json({ message: "delivery not found" });
   }
-  delivery.firstname = firstname;
-  delivery.lastname = lastname;
-  delivery.telephone = telephone;
-  delivery.city = city;
-  delivery.address = address;
+  if (firstname) {
+    delivery.firstname = firstname;
+  }
+  if (lastname) {
+    delivery.lastname = lastname;
+  }
+  if (telephone) {
+    delivery.telephone = telephone;
+  }
+  if (city) {
+    delivery.city = city;
+  }
+  if (address) {
+    delivery.address = address;
+  }
 
   await delivery.save();
 
