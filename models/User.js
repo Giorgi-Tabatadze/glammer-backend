@@ -13,8 +13,10 @@ module.exports = (sequelize, DataTypes) => {
           arg: true,
           msg: "username is already taken.",
         },
+
         validate: {
           notNull: { msg: "username is required" },
+          notEmpty: { msg: "username is required" },
         },
       },
       password: {
@@ -22,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: { msg: "password is required" },
+          notEmpty: { msg: "password is required" },
         },
       },
       role: {

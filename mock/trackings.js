@@ -35,6 +35,4 @@ const trackings = [...Array(6)].map((_, index) => {
   };
 });
 
-console.log(trackings);
-
 module.exports = trackings;

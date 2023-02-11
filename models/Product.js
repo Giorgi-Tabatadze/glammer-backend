@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         validate: {
           notNull: { msg: "productcode is required" },
+          notEmpty: { msg: "productcode is required" },
         },
       },
 
@@ -18,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         get() {
           const rawValue = this.getDataValue("thumbnail");
-          return rawValue ? `public/images/products/${rawValue}` : null;
+          return rawValue ? `images/products/${rawValue}` : null;
         },
       },
       price: {
@@ -26,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: { msg: "price is required" },
+          notEmpty: { msg: "price is required" },
         },
       },
       taobaoPrice: DataTypes.DECIMAL,

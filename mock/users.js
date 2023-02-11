@@ -3,7 +3,7 @@ const { faker } = require("@faker-js/faker");
 
 // ----------------------------------------------------------------------
 
-const users = [...Array(10)].map((_, index) => ({
+const users = [...Array(200)].map((_, index) => ({
   username: faker.internet.userName(),
   password: "1234",
   role: "customer",
@@ -11,7 +11,5 @@ const users = [...Array(10)].map((_, index) => ({
   lastName: faker.name.lastName(),
   deliveryId: index + 1,
 }));
-
-console.log(users);
 
 module.exports = users;

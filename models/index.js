@@ -8,6 +8,7 @@ const sequelize = new Sequelize(
   {
     host: dbConfig.HOST,
     dialect: dbConfig.DIALECT,
+    logging: false,
   },
 );
 const db = {};
@@ -59,6 +60,12 @@ db.models.User.hasMany(db.models.Order, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
+db.models.Order.belongsTo(db.models.User, {
+  foreignKey: { allowNull: true },
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
 db.models.User.belongsTo(db.models.Delivery, {
   foreignKey: {
     allowNull: false,

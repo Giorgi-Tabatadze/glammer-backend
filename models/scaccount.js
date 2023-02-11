@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: { msg: "email is required" },
+          notEmpty: { msg: "email is required" },
           isEmail: true,
         },
         unique: {
@@ -24,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: { msg: "company is required" },
+          notEmpty: { msg: "company is required" },
         },
       },
     },

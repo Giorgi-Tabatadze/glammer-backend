@@ -3,14 +3,12 @@ const { faker } = require("@faker-js/faker");
 
 // ----------------------------------------------------------------------
 
-const deliveries = [...Array(24)].map((_, index) => ({
+const deliveries = [...Array(300)].map((_, index) => ({
   firstname: faker.name.firstName(),
   lastname: faker.name.lastName(),
   telephone: faker.phone.phoneNumber(),
   city: faker.address.city(),
   address: faker.address.streetAddress(),
 }));
-
-console.log(deliveries);
 
 module.exports = deliveries;

@@ -17,6 +17,4 @@ const products = [...Array(6)].map((_, index) => {
   };
 });
 
-console.log(products);
-
 module.exports = products;

@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: { msg: "fundsDeposited is required" },
+          notEmpty: { msg: "fundsDeposited is required" },
         },
       },
       deliveryPrice: { type: DataTypes.DECIMAL, defaultValue: 5 },
@@ -15,6 +16,8 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: { msg: "status is required" },
+          notEmpty: { msg: "status is required" },
+
           isIn: {
             args: [
               [

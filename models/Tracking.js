@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: { msg: "trackingcode is required" },
+          notEmpty: { msg: "trackingcode is required" },
         },
         unique: {
           arg: true,

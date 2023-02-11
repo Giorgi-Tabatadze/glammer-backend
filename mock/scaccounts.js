@@ -11,6 +11,4 @@ const scaccounts = [...Array(5)].map((_, index) => ({
   password: "1234",
 }));
 
-console.log(scaccounts);
-
 module.exports = scaccounts;
