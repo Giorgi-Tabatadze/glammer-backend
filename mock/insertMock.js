@@ -54,10 +54,7 @@ const InsertMockData = async () => {
   );
   await Promise.all(
     Productinstances.map(async (productInstance) => {
-      await ProductInstance.create({
-        ...productInstance,
-        orderId: randomNumber(1, 10),
-      });
+      await ProductInstance.create(productInstance);
     }),
   );
 };

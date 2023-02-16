@@ -79,7 +79,6 @@ db.models.Order.hasMany(db.models.ProductInstance, {
   foreignKey: {
     allowNull: false,
   },
-  onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
 db.models.ProductInstance.belongsTo(db.models.Order, {

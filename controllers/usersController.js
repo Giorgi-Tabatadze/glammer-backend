@@ -21,7 +21,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
   if (sorting?.length > 2) {
     const parsed = JSON.parse(sorting)[0];
-    console.log(parsed);
     if (parsed.id.includes(".")) {
       sortingObject = [
         { model: Delivery, as: "delivery" },
@@ -58,7 +57,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
       filterObjects.push(query);
     });
   }
-  console.log(filterObjects);
 
   const offset = page * limit;
   const Users = await User.findAndCountAll({

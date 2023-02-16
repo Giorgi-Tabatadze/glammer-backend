@@ -28,7 +28,15 @@ const getAllOrders = asyncHandler(async (req, res) => {
     include: [
       {
         model: User,
-        required: false,
+        as: "user",
+        required: true,
+        where: where.userWhere,
+        include: [
+          {
+            model: Delivery,
+            required: false,
+          },
+        ],
       },
       {
         model: ProductInstance,
@@ -47,6 +55,10 @@ const getAllOrders = asyncHandler(async (req, res) => {
             where: where.productWhere,
           },
         ],
+      },
+      {
+        model: Delivery,
+        required: false,
       },
     ],
     order: [sortingObject],
@@ -76,26 +88,6 @@ const createNewOrder = asyncHandler(async (req, res) => {
     }
     let alternativeDeliverySaved = null;
     if (alternativeDelivery) {
-      if (!alternativeDelivery.firstname) {
-        res.status(400);
-        throw new Error("firstname is required");
-      }
-      if (!alternativeDelivery.lastname) {
-        res.status(400);
-        throw new Error("lastname is required");
-      }
-      if (!alternativeDelivery.telephone) {
-        res.status(400);
-        throw new Error("telephone is required");
-      }
-      if (!alternativeDelivery.city) {
-        res.status(400);
-        throw new Error("city is required");
-      }
-      if (!alternativeDelivery.address) {
-        res.status(400);
-        throw new Error("address is required");
-      }
       alternativeDeliverySaved = await Delivery.create(alternativeDelivery, {
         transaction: t,
       });
@@ -104,8 +96,8 @@ const createNewOrder = asyncHandler(async (req, res) => {
       {
         userId,
         alternativeDeliveryId: alternativeDeliverySaved?.id,
-        fundsDeposited,
-        deliveryPrice,
+        fundsDeposited: parseFloat(fundsDeposited),
+        deliveryPrice: parseFloat(deliveryPrice),
         status,
         customerNote,
         staffNote,
@@ -116,12 +108,12 @@ const createNewOrder = asyncHandler(async (req, res) => {
       productInstances.map(async (productInstance) => {
         await ProductInstance.create(
           {
-            productId: productInstance.productId,
+            productId: productInstance?.productId,
             orderId: newOrder.id,
-            ordered: productInstance.ordered,
-            size: productInstance.size,
-            color: productInstance.color,
-            differentPrice: productInstance.differentPrice,
+            ordered: productInstance?.ordered,
+            size: productInstance?.size,
+            color: productInstance?.color,
+            differentPrice: parseFloat(productInstance?.differentPrice) || null,
           },
           { transaction: t },
         );
@@ -175,6 +167,25 @@ const updateOrder = asyncHandler(async (req, res) => {
       );
       await order.save({ transaction: t });
     });
+  } else if (alternativeDelivery) {
+    if (order.alternativeDeliveryId) {
+      await db.sequelize.transaction(async (t) => {
+        await Delivery.update(
+          alternativeDelivery,
+          {
+            where: {
+              id: order.alternativeDeliveryId,
+            },
+          },
+          { transaction: t },
+        );
+        await order.save({ transaction: t });
+      });
+    } else {
+      const newAlternativeDelivery = await Delivery.create(alternativeDelivery);
+      order.alternativeDeliveryId = newAlternativeDelivery.id;
+      await order.save();
+    }
   } else {
     await order.save();
   }
@@ -205,12 +216,31 @@ const deleteOrder = asyncHandler(async (req, res) => {
         },
         { transaction: t },
       );
+      await ProductInstance.destroy(
+        {
+          where: {
+            id: order.id,
+          },
+        },
+        { transaction: t },
+      );
       await order.destroy({ transaction: t });
     });
+    res.status(200);
   } else {
-    await order.destroy();
+    await db.sequelize.transaction(async (t) => {
+      await ProductInstance.destroy(
+        {
+          where: {
+            id: order.id,
+          },
+        },
+        { transaction: t },
+      );
+      await order.destroy({ transaction: t });
+    });
+    res.status(200);
   }
-  res.status(200);
   res.json();
 });
 

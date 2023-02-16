@@ -5,6 +5,7 @@ const getOrderColumnFilters = (columnfilters) => {
   const productInstanceFilter = [];
   const trackingFilter = [];
   const productFilter = [];
+  const userFilter = [];
 
   if (columnfilters?.length > 2) {
     JSON.parse(columnfilters).forEach((filter) => {
@@ -15,10 +16,17 @@ const getOrderColumnFilters = (columnfilters) => {
         };
         productInstanceFilter.push(query);
       } else if (filter.id === "orderId") {
-        query = {
-          [`$order.id$`]: { [Op.eq]: Number(filter.value) },
-        };
-        orderFilter.push(query);
+        if (/^\d+$/.test(filter.value)) {
+          query = {
+            [`$order.id$`]: { [Op.eq]: Number(filter.value) },
+          };
+          orderFilter.push(query);
+        } else {
+          query = {
+            [`$user.username$`]: { [Op.iLike]: `${filter.value}%` },
+          };
+          userFilter.push(query);
+        }
       } else if (filter.id.includes("order.")) {
         const filterId = filter.id.split(".").pop();
         if (filterId === "createdAt") {
@@ -95,6 +103,8 @@ const getOrderColumnFilters = (columnfilters) => {
     trackingFilter.length > 0 ? { [Op.or]: [...trackingFilter] } : {};
   const productWhere =
     productFilter.length > 0 ? { [Op.or]: [...productFilter] } : {};
+  const userWhere = userFilter.length > 0 ? { [Op.or]: [...userFilter] } : {};
+
   const trackingRequired = trackingFilter.length > 0;
   const productRequired = productFilter.length > 0;
   return {
@@ -104,6 +114,7 @@ const getOrderColumnFilters = (columnfilters) => {
     productWhere,
     trackingRequired,
     productRequired,
+    userWhere,
   };
 };
 

@@ -10,10 +10,9 @@ function randomNumber(min, max) {
 const size = ["S", "M", "L"];
 const colors = ["black", "white", "red", "blue"];
 
-const productInstances = [...Array(30)].map((_, index) => {
+const productInstances = [...Array(5000)].map((_, index) => {
   const setIndex = index;
 
-  // randomize product instances to have undefined or number trackingId
   return {
     ordered: randomNumber(1, 3) === 1,
     size: size[randomNumber(1, 3)],
@@ -21,6 +20,7 @@ const productInstances = [...Array(30)].map((_, index) => {
     differentPrice: undefined,
     productId: randomNumber(1, 6),
     trackingId: randomNumber(1, 3) === 1 ? undefined : randomNumber(1, 6),
+    orderId: randomNumber(1, 1000),
   };
 });
 

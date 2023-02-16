@@ -10,7 +10,7 @@ function randomNumber(min, max) {
 const size = ["S", "M", "L"];
 const colors = ["black", "white", "red", "blue"];
 
-const orders = [...Array(10)].map((_, index) => {
+const orders = [...Array(1000)].map((_, index) => {
   const setIndex = index;
 
   return {

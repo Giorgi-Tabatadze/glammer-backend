@@ -1,22 +1,39 @@
 const asyncHandler = require("express-async-handler");
+const { Op } = require("sequelize");
 const {
-  models: { ProductInstance },
+  models: { ProductInstance, Tracking, Product },
 } = require("../models");
+const db = require("../models");
 
 // @desc Get all ProductInstances
 // @routes GET /productInstances
 // @access Private
 const getAllProductInstances = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 20 } = req.query;
-  const offset = (page - 1) * limit;
-  const productInstances = await ProductInstance.findAll({
+  const { page = 0, limit = 20, orderId } = req.query;
+  const offset = page * limit;
+
+  console.log(orderId);
+
+  const where = parseFloat(orderId) ? { orderId: parseFloat(orderId) } : {};
+
+  console.log(where);
+
+  const productInstances = await ProductInstance.findAndCountAll({
     limit,
     offset,
-    where: {}, // conditions
+    where,
+    include: [
+      {
+        model: Tracking,
+        required: false,
+      },
+      {
+        model: Product,
+        required: false,
+      },
+    ],
   });
-  if (!productInstances?.length) {
-    return res.status(400).json({ message: "no productInstances found" });
-  }
+
   res.json(productInstances);
 });
 
@@ -28,17 +45,17 @@ const createNewProductInstance = asyncHandler(async (req, res) => {
     ordered,
     size,
     color,
-    differentprice,
+    differentPrice,
     orderId,
     productId,
     trackingId,
   } = req.body;
 
   const productInstanceObject = {
-    ordered,
+    ordered: ordered === "true",
     size,
     color,
-    differentprice,
+    differentPrice,
     orderId,
     productId,
     trackingId,
@@ -53,26 +70,47 @@ const createNewProductInstance = asyncHandler(async (req, res) => {
 // @routes PATCH /productInstances
 // @access Private
 const updateProductInstance = asyncHandler(async (req, res) => {
-  const { id, ordered, size, color, differentprice, productId, trackingId } =
+  const { id, ordered, size, color, differentPrice, productId, trackingCode } =
     req.body;
 
   if (!id) {
     return res.status(400).json({ message: "id is required" });
   }
 
-  const productInstance = ProductInstance.findByPk(id);
+  const productInstance = await ProductInstance.findByPk(id);
   if (!productInstance) {
     return res.status(400).json({ message: "productInstance not found" });
   }
 
-  productInstance.ordered = ordered;
+  productInstance.ordered = ordered === "true";
   productInstance.size = size;
   productInstance.color = color;
-  productInstance.differentprice = differentprice;
+  productInstance.differentPrice = differentPrice;
   productInstance.productId = productId;
-  productInstance.trackingId = trackingId;
 
-  await productInstance.save();
+  if (trackingCode) {
+    const tracking = await Tracking.findOne({
+      where: {
+        trackingCode,
+      },
+    });
+    if (tracking) {
+      productInstance.trackingId = tracking.id;
+    } else {
+      await db.sequelize.transaction(async (t) => {
+        const newTracking = await Tracking.create(
+          {
+            trackingCode,
+          },
+          { transaction: t },
+        );
+        productInstance.trackingId = newTracking.id;
+        await productInstance.save({ transaction: t });
+      });
+    }
+  } else {
+    await productInstance.save();
+  }
 
   res.json();
 });
@@ -86,7 +124,22 @@ const deleteProductInstance = asyncHandler(async (req, res) => {
   if (!id) {
     return res.status(400).json({ message: "id is required" });
   }
+  const productInstance = await ProductInstance.findByPk(id);
 
+  if (!productInstance) {
+    return res.status(400).json({ message: "productInstance not found" });
+  }
+
+  const SameORderProductInstances = await ProductInstance.findAll({
+    where: {
+      orderId: productInstance.orderId,
+    },
+  });
+  if (SameORderProductInstances.length === 1) {
+    return res.status(400).json({
+      message: "You can't delete the last productInstance of an order",
+    });
+  }
   const result = await ProductInstance.destroy({
     where: {
       id,
