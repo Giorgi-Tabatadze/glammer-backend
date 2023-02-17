@@ -19,7 +19,7 @@ const productInstances = [...Array(5000)].map((_, index) => {
     color: colors[randomNumber(1, 4)],
     differentPrice: undefined,
     productId: randomNumber(1, 6),
-    trackingId: randomNumber(1, 3) === 1 ? undefined : randomNumber(1, 6),
+    trackingId: randomNumber(1, 3) === 1 ? undefined : randomNumber(1, 50),
     orderId: randomNumber(1, 1000),
   };
 });

@@ -16,9 +16,18 @@ const orders = [...Array(1000)].map((_, index) => {
   return {
     fundsDeposited: 20,
     differentPrice: undefined,
-    status: "tracked",
+    // status is either "created", "ordered", "tracked" or "sent" or "delivered" or "other" or "canceled"
+    status: [
+      "created",
+      "ordered",
+      "tracked",
+      "sent",
+      "delivered",
+      "other",
+      "canceled",
+    ][randomNumber(0, 7)],
     userId: randomNumber(1, 8),
-    alternativeDeliveryId: index > 7 ? randomNumber(11, 24) : undefined,
+    alternativeDeliveryId: index > 200 ? index : undefined,
     customerNote:
       "Please make it fast or I will sue you and put you in jail! you mathafakakakakakakaka",
     staffNote:

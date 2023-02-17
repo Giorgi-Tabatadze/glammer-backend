@@ -107,6 +107,7 @@ const getOrderColumnFilters = (columnfilters) => {
 
   const trackingRequired = trackingFilter.length > 0;
   const productRequired = productFilter.length > 0;
+
   return {
     orderWhere,
     productInstanceWhere,

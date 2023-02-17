@@ -82,7 +82,8 @@ const updateProductInstance = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "productInstance not found" });
   }
 
-  productInstance.ordered = ordered === "true";
+  console.log(trackingCode);
+  productInstance.ordered = ordered || ordered === "true";
   productInstance.size = size;
   productInstance.color = color;
   productInstance.differentPrice = differentPrice;
@@ -96,6 +97,7 @@ const updateProductInstance = asyncHandler(async (req, res) => {
     });
     if (tracking) {
       productInstance.trackingId = tracking.id;
+      await productInstance.save();
     } else {
       await db.sequelize.transaction(async (t) => {
         const newTracking = await Tracking.create(

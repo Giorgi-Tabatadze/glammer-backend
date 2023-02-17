@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 const Sequelize = require("sequelize");
 const dbConfig = require("../config/sqlDbConn");
 
@@ -11,6 +12,7 @@ const sequelize = new Sequelize(
     logging: false,
   },
 );
+
 const db = {};
 db.sequelize = sequelize;
 db.models = {};

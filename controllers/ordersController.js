@@ -1,6 +1,5 @@
 /* eslint-disable no-plusplus */
 const asyncHandler = require("express-async-handler");
-const _ = require("lodash");
 const db = require("../models");
 const getOrderColumnFilters = require("./util/getOrderColumnFilters");
 const {
@@ -24,24 +23,13 @@ const getAllOrders = asyncHandler(async (req, res) => {
     distinct: true,
     limit,
     offset,
+    col: `id`,
     where: where.orderWhere,
     include: [
       {
-        model: User,
-        as: "user",
-        required: true,
-        where: where.userWhere,
-        include: [
-          {
-            model: Delivery,
-            required: false,
-          },
-        ],
-      },
-      {
         model: ProductInstance,
-        as: "productinstances",
-        required: false,
+        required: true,
+
         where: where.productInstanceWhere,
         include: [
           {
@@ -53,6 +41,18 @@ const getAllOrders = asyncHandler(async (req, res) => {
             model: Product,
             required: where.productRequired,
             where: where.productWhere,
+          },
+        ],
+      },
+      {
+        model: User,
+        required: true,
+        where: where.userWhere,
+
+        include: [
+          {
+            model: Delivery,
+            required: false,
           },
         ],
       },
@@ -147,9 +147,8 @@ const updateOrder = asyncHandler(async (req, res) => {
   if (!order) {
     return res.status(400).json({ message: "order not found" });
   }
-  if (userId) {
-    order.userId = userId;
-  }
+  console.log(userId);
+  order.userId = userId;
   order.fundsDeposited = fundsDeposited;
   order.deliveryPrice = deliveryPrice;
   order.status = status;
@@ -165,6 +164,7 @@ const updateOrder = asyncHandler(async (req, res) => {
         },
         { transaction: t },
       );
+      order.alternativeDeliveryId = null;
       await order.save({ transaction: t });
     });
   } else if (alternativeDelivery) {
