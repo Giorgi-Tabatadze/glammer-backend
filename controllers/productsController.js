@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
+const sharp = require("sharp");
 const {
   models: { Product },
 } = require("../models");
@@ -25,29 +26,44 @@ const getAllProducts = asyncHandler(async (req, res) => {
 // @routes POST /products
 // @access Private
 const createNewProduct = asyncHandler(async (req, res, next) => {
-  const {
-    productCode,
-    price,
-    taobaoprice,
-    taobaoshippingprice,
-    taobaoUrl,
-    instagramUrl,
-  } = req.body;
+  const { data } = req.body;
+
+  const { price, taobaoPrice, shippingPrice, taobaoUrl, instagramUrl } =
+    JSON.parse(data);
 
   if (req?.fileUploadError) {
     return res.status(400).json({ message: req.fileUploadError.msg });
   }
+  if (!req.file) {
+    return res.status(400).json({ message: "thumbnail is required" });
+  }
   const productObject = {
-    productCode,
     price,
-    taobaoprice,
-    taobaoshippingprice,
+    taobaoPrice,
+    shippingPrice,
     taobaoUrl,
     instagramUrl,
-    thumbnail: req?.file?.filename,
   };
-  // create new Product
-  await Product.create(productObject);
+  const newProduct = await Product.create(productObject);
+
+  const path = `./public/images/products/`;
+  const versions = [
+    { width: 750, height: 750, suffix: "large" },
+    { width: 300, height: 300, suffix: "medium" },
+    { width: 150, height: 150, suffix: "small" },
+  ];
+
+  await Promise.all(
+    versions.map(async (version) => {
+      await sharp(req.file.buffer)
+        .resize(version.width, version.height)
+        .toFile(`${path}/${version.suffix}/${newProduct.id}.jpg`);
+    }),
+  );
+
+  // Handle success case here
+
+  // // create new Product
   res.status(201).json();
 });
 
@@ -60,7 +76,7 @@ const updateProduct = asyncHandler(async (req, res, next) => {
     productCode,
     price,
     taobaoprice,
-    taobaoshippingprice,
+    shippingPrice,
     taobaoUrl,
     instagramUrl,
   } = req.body;
@@ -82,7 +98,7 @@ const updateProduct = asyncHandler(async (req, res, next) => {
   product.productCode = productCode;
   product.price = price;
   product.taobaoprice = taobaoprice;
-  product.taobaoshippingprice = taobaoshippingprice;
+  product.shippingPrice = shippingPrice;
   product.taobaoUrl = taobaoUrl;
   product.instagramUrl = instagramUrl;
 
