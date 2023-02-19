@@ -22,7 +22,7 @@ const products = [...Array(6)].map((_, index) => {
   return {
     price: 45,
     taobaoPrice: 10,
-    role: "customer",
+    shippingPrice: 8,
   };
 });
 

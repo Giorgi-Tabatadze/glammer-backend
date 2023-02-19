@@ -9,16 +9,18 @@ const {
 // @routes GET /products
 // @access Private
 const getAllProducts = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 20 } = req.query;
-  const offset = (page - 1) * limit;
+  const { page = 0, limit = 20, id } = req.query;
+  const offset = page * limit;
+  const sortingObject = ["id", "DESC"];
+  const where = id ? { id: parseFloat(id) } : {};
+
   const products = await Product.findAll({
     limit,
     offset,
-    where: {}, // conditions
+    where,
+    order: [sortingObject], // conditions
   });
-  if (!products?.length) {
-    return res.status(400).json({ message: "no products found" });
-  }
+
   res.json(products);
 });
 
@@ -71,15 +73,10 @@ const createNewProduct = asyncHandler(async (req, res, next) => {
 // @routes PATCH /products
 // @access Private
 const updateProduct = asyncHandler(async (req, res, next) => {
-  const {
-    id,
-    productCode,
-    price,
-    taobaoprice,
-    shippingPrice,
-    taobaoUrl,
-    instagramUrl,
-  } = req.body;
+  const { data } = req.body;
+
+  const { id, price, taobaoPrice, shippingPrice, taobaoUrl, instagramUrl } =
+    JSON.parse(data);
 
   if (req?.fileUploadError) {
     return res.status(400).json({ message: req.fileUploadError.msg });
@@ -95,29 +92,31 @@ const updateProduct = asyncHandler(async (req, res, next) => {
     return res.status(400).json({ message: "product not found" });
   }
 
-  product.productCode = productCode;
   product.price = price;
-  product.taobaoprice = taobaoprice;
+  product.taobaoPrice = taobaoPrice;
   product.shippingPrice = shippingPrice;
   product.taobaoUrl = taobaoUrl;
   product.instagramUrl = instagramUrl;
 
-  const oldThumbnail = product.thumbnail;
-
-  if (req?.file?.filename) {
-    product.thumbnail = req?.file?.filename;
-  }
   await product.save();
 
-  if (oldThumbnail && req?.file?.filename) {
-    fs.unlink(oldThumbnail, (error) => {
-      if (error) {
-        console.log(error.stack);
-      } else {
-        console.log("oldthumbnail deleted due to update");
-      }
-    });
+  if (req?.file?.buffer) {
+    const path = `./public/images/products/`;
+    const versions = [
+      { width: 750, height: 750, suffix: "large" },
+      { width: 300, height: 300, suffix: "medium" },
+      { width: 150, height: 150, suffix: "small" },
+    ];
+
+    await Promise.all(
+      versions.map(async (version) => {
+        await sharp(req.file.buffer)
+          .resize(version.width, version.height)
+          .toFile(`${path}/${version.suffix}/${product.id}.jpg`);
+      }),
+    );
   }
+
   res.status(200).json();
 });
 
