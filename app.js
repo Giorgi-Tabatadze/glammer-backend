@@ -7,7 +7,7 @@ const errorHandler = require("./middleware/errorHandler");
 const corsOption = require("./config/corsOptions");
 const { logEvents, logger } = require("./middleware/logger");
 const db = require("./models");
-const InsertMockData = require("./mock/insertMock");
+// const InsertMockData = require("./mock/insertMock");
 
 const PORT = process.env.PORT || 3500;
 
@@ -29,9 +29,9 @@ app.set("view engine", "pug");
       "mongoErrLog.log",
     );
   }
-  await db.sequelize.sync({ force: true });
+  await db.sequelize.sync({ force: false });
   if (process.env.NODE_ENV === "development") {
-    await InsertMockData();
+    // await InsertMockData();
   }
 })();
 
