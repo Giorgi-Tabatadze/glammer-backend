@@ -1,3 +1,3 @@
-const allowedOrigins = [process.env.ALLOWED_ORIGIN];
+const allowedOrigins = ["https://glammertestfrontend.onrender.com"];
 
 module.exports = allowedOrigins;
