@@ -8,16 +8,19 @@ const {
 // @access Private
 
 const getAllScaccounts = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 20 } = req.query;
-  const offset = (page - 1) * limit;
-  const Scaccounts = await Scaccount.findAll({
+  const { page = 0, limit = 20 } = req.query;
+  const offset = page * limit;
+
+  const sortingObject = ["id", "DESC"];
+
+  const Scaccounts = await Scaccount.findAndCountAll({
     limit,
     offset,
     where: {}, // conditions
+    attributes: { exclude: ["password"] },
+    order: [sortingObject],
   });
-  if (!Scaccounts?.length) {
-    return res.status(400).json({ message: "no Scaccounts found" });
-  }
+
   return res.json(Scaccounts);
 });
 
@@ -25,9 +28,9 @@ const getAllScaccounts = asyncHandler(async (req, res) => {
 // @routes POST /scaccounts
 // @access Private
 const createNewScaccount = asyncHandler(async (req, res) => {
-  const { email, password, company } = req.body;
+  const { username, password, company } = req.body;
 
-  const ScaccountObject = { email, password, company };
+  const ScaccountObject = { username, password, company };
 
   // create new Scaccount
   await Scaccount.create(ScaccountObject);
@@ -36,7 +39,7 @@ const createNewScaccount = asyncHandler(async (req, res) => {
 });
 
 const updateScaccount = asyncHandler(async (req, res) => {
-  const { id, email, password, company } = req.body;
+  const { id, username, password, company } = req.body;
 
   if (!id) {
     return res.status(400).json({ message: "ID is required" });
@@ -46,8 +49,10 @@ const updateScaccount = asyncHandler(async (req, res) => {
   if (!scaccount) {
     return res.status(400).json({ message: "scaccount not found" });
   }
-  scaccount.email = email;
-  scaccount.password = password;
+  scaccount.username = username;
+  if (password) {
+    scaccount.password = password;
+  }
   scaccount.company = company;
 
   await scaccount.save();

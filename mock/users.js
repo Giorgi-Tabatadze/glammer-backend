@@ -11,5 +11,20 @@ const users = [...Array(200)].map((_, index) => ({
   lastName: faker.name.lastName(),
   deliveryId: index + 1,
 }));
+users.push({
+  username: "test1",
+  password: "123456",
+  role: "customer",
+});
+users.push({
+  username: "test2",
+  password: "123456",
+  role: "employee",
+});
+users.push({
+  username: "test3",
+  password: "123456",
+  role: "admin",
+});
 
 module.exports = users;

@@ -20,6 +20,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
   const where = getOrderColumnFilters(columnfilters);
 
   const orders = await Order.findAndCountAll({
+    logging: console.log,
     distinct: true,
     limit,
     offset,
@@ -147,7 +148,6 @@ const updateOrder = asyncHandler(async (req, res) => {
   if (!order) {
     return res.status(400).json({ message: "order not found" });
   }
-  console.log(userId);
   order.userId = userId;
   order.fundsDeposited = fundsDeposited;
   order.deliveryPrice = deliveryPrice;

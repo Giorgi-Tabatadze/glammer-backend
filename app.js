@@ -38,8 +38,8 @@ app.set("view engine", "pug");
 app.use(logger);
 app.use(cors(corsOption));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 const indexRouter = require("./routes/root");
@@ -50,6 +50,7 @@ const productInstanceRouter = require("./routes/productInstanceRoutes");
 const orderRouter = require("./routes/orderRoutes");
 const scaccountRouter = require("./routes/scaccountRoutes");
 const deliveryRouter = require("./routes/deliveryRoutes");
+const authRouter = require("./routes/authRoutes");
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
@@ -59,6 +60,7 @@ app.use("/productinstances", productInstanceRouter);
 app.use("/orders", orderRouter);
 app.use("/scaccounts", scaccountRouter);
 app.use("/deliveries", deliveryRouter);
+app.use("/auth", authRouter);
 
 app.all("*", (req, res) => {
   res.status(404);

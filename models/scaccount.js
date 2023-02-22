@@ -1,16 +1,13 @@
-const bcrypt = require("bcrypt");
-
 module.exports = (sequelize, DataTypes) => {
   const Scaccount = sequelize.define(
     "scaccount",
     {
-      email: {
+      username: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notNull: { msg: "email is required" },
-          notEmpty: { msg: "email is required" },
-          isEmail: true,
+          notNull: { msg: "username is required" },
+          notEmpty: { msg: "username is required" },
         },
         unique: {
           arg: true,
@@ -19,6 +16,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       password: {
         type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "company is required" },
+          notEmpty: { msg: "company is required" },
+        },
       },
       company: {
         type: DataTypes.STRING,
@@ -31,22 +33,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       freezeTableName: true,
-      hooks: {
-        beforeCreate: async (scaccount) => {
-          if (scaccount.password) {
-            const hashedPwd = await bcrypt.hash(scaccount.password, 10);
-            // eslint-disable-next-line no-param-reassign
-            scaccount.password = hashedPwd;
-          }
-        },
-        beforeUpdate: async (scaccount) => {
-          if (scaccount.password) {
-            const hashedPwd = await bcrypt.hash(scaccount.password, 10);
-            // eslint-disable-next-line no-param-reassign
-            scaccount.password = hashedPwd;
-          }
-        },
-      },
     },
   );
   return Scaccount;

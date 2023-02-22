@@ -100,7 +100,7 @@ const createNewUser = asyncHandler(async (req, res) => {
       {
         username,
         password: password || "3492",
-        role,
+        role: req.role === "admin" ? role : "customer",
         deliveryId: newDelivery.id,
       },
       { transaction: t },
@@ -126,10 +126,12 @@ const updateUser = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "user not found" });
   }
   user.username = username;
-  if (password) {
+  if (password && req.role === "admin") {
     user.password = password;
   }
-  user.role = role;
+  if (req.role === "admin") {
+    user.role = role;
+  }
 
   await user.save();
 
