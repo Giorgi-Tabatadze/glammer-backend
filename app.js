@@ -51,6 +51,7 @@ const orderRouter = require("./routes/orderRoutes");
 const scaccountRouter = require("./routes/scaccountRoutes");
 const deliveryRouter = require("./routes/deliveryRoutes");
 const authRouter = require("./routes/authRoutes");
+const clientViewsRouter = require("./routes/clientviewRoutes");
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
@@ -61,6 +62,7 @@ app.use("/orders", orderRouter);
 app.use("/scaccounts", scaccountRouter);
 app.use("/deliveries", deliveryRouter);
 app.use("/auth", authRouter);
+app.use("/clientviews", clientViewsRouter);
 
 app.all("*", (req, res) => {
   res.status(404);

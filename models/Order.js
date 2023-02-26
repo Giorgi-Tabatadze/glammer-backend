@@ -17,17 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: { msg: "status is required" },
 
         isIn: {
-          args: [
-            [
-              "created",
-              "ordered",
-              "tracked",
-              "sent",
-              "delivered",
-              "other",
-              "canceled",
-            ],
-          ],
+          args: [["created", "delivered", "other", "canceled"]],
           msg: "invalid status",
         },
       },

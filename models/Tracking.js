@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         msg: "trackingcode is already taken.",
       },
     },
+    flightNumber: DataTypes.STRING,
     status: DataTypes.STRING,
     declared: DataTypes.BOOLEAN,
     declaredFunds: DataTypes.DECIMAL,
