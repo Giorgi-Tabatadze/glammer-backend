@@ -8,6 +8,7 @@ const corsOption = require("./config/corsOptions");
 const { logEvents, logger } = require("./middleware/logger");
 const db = require("./models");
 const InsertInitialAdmin = require("./models/insertInitialAdmin");
+const createImageFolders = require("./mock/addImageFolders");
 
 const PORT = process.env.PORT || 3500;
 
@@ -31,9 +32,8 @@ app.set("view engine", "pug");
   }
   await db.sequelize.sync();
   InsertInitialAdmin();
+  createImageFolders();
 })();
-
-console.log([process.env.REACT_APP_DOMAIN, process.env.SCRAPE_API_DOMAIN]);
 
 app.use(logger);
 app.use(cors(corsOption));
