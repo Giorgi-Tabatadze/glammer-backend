@@ -12,16 +12,16 @@ const { faker } = require("@faker-js/faker");
 //   deliveryId: index + 1,
 // }));
 const users = [];
-users.push({
-  username: "test1",
-  password: "123456",
-  role: "customer",
-});
-users.push({
-  username: "test2",
-  password: "123456",
-  role: "employee",
-});
+// users.push({
+//   username: "test1",
+//   password: "123456",
+//   role: "customer",
+// });
+// users.push({
+//   username: "test2",
+//   password: "123456",
+//   role: "employee",
+// });
 users.push({
   username: "test3",
   password: "123456",
