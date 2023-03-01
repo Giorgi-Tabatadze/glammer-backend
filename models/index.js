@@ -17,20 +17,20 @@ const db = {};
 db.sequelize = sequelize;
 db.models = {};
 
-db.models.User = require("./user")(sequelize, Sequelize.DataTypes);
+db.models.User = require("./User")(sequelize, Sequelize.DataTypes);
 
-db.models.Order = require("./order")(sequelize, Sequelize.DataTypes);
+db.models.Order = require("./Order")(sequelize, Sequelize.DataTypes);
 
-db.models.Delivery = require("./delivery")(sequelize, Sequelize.DataTypes);
+db.models.Delivery = require("./Delivery")(sequelize, Sequelize.DataTypes);
 
-db.models.Product = require("./product")(sequelize, Sequelize.DataTypes);
-db.models.ProductInstance = require("./productInstance")(
+db.models.Product = require("./Product")(sequelize, Sequelize.DataTypes);
+db.models.ProductInstance = require("./ProductInstance")(
   sequelize,
   Sequelize.DataTypes,
 );
 
-db.models.Tracking = require("./tracking")(sequelize, Sequelize.DataTypes);
-db.models.Scaccount = require("./scaccount")(sequelize, Sequelize.DataTypes);
+db.models.Tracking = require("./Tracking")(sequelize, Sequelize.DataTypes);
+db.models.Scaccount = require("./Scaccount")(sequelize, Sequelize.DataTypes);
 
 /// / ASSOSIATIONS //////////////////////////////
 
