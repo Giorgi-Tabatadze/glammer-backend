@@ -4,7 +4,7 @@ const {
 
 const InsertInitialAdmin = async () => {
   const [adminUser, created] = await User.findOrCreate({
-    where: { username: "iakoAdmin" },
+    where: { username: "iakoadmin" },
     defaults: { password: "123456", role: "admin" },
   });
 };
