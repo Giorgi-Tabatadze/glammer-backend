@@ -20,7 +20,6 @@ const getAllOrders = asyncHandler(async (req, res) => {
   const where = getOrderColumnFilters(columnfilters);
 
   const orders = await Order.findAndCountAll({
-    logging: console.log,
     distinct: true,
     limit,
     offset,

@@ -1,7 +1,7 @@
 module.exports = {
-  HOST: "localhost",
-  USER: "postgres",
-  PASSWORD: "null",
-  DATABASE: "glammerr",
-  DIALECT: "postgres",
+  HOST: process.env.HOST,
+  USER: process.env.DBUSER,
+  PASSWORD: process.env.PASSWORD,
+  DATABASE: process.env.DATABASE,
+  DIALECT: process.env.DIALECT,
 };

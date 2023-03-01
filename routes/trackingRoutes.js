@@ -15,4 +15,7 @@ router
   .patch(checkAdmin, trackingController.updateTracking)
   .delete(checkAdmin, trackingController.deleteTracking);
 
+router
+  .route("/startscrape")
+  .patch(checkAdmin, trackingController.startTrackingUpdateProcess);
 module.exports = router;

@@ -5,6 +5,11 @@ const {
   models: { Product },
 } = require("../models");
 
+const versions = [
+  { width: 750, height: 750, suffix: "large" },
+  { width: 300, height: 300, suffix: "medium" },
+  { width: 150, height: 150, suffix: "small" },
+];
 // @desc Get all Products
 // @routes GET /products
 // @access Private
@@ -49,11 +54,6 @@ const createNewProduct = asyncHandler(async (req, res, next) => {
   const newProduct = await Product.create(productObject);
 
   const path = `./public/images/products/`;
-  const versions = [
-    { width: 750, height: 750, suffix: "large" },
-    { width: 300, height: 300, suffix: "medium" },
-    { width: 150, height: 150, suffix: "small" },
-  ];
 
   await Promise.all(
     versions.map(async (version) => {
@@ -102,11 +102,6 @@ const updateProduct = asyncHandler(async (req, res, next) => {
 
   if (req?.file?.buffer) {
     const path = `./public/images/products/`;
-    const versions = [
-      { width: 750, height: 750, suffix: "large" },
-      { width: 300, height: 300, suffix: "medium" },
-      { width: 150, height: 150, suffix: "small" },
-    ];
 
     await Promise.all(
       versions.map(async (version) => {
@@ -138,8 +133,27 @@ const deleteProduct = asyncHandler(async (req, res) => {
   if (!result) {
     res.status(204);
   } else {
+    const path = `public/images/products`;
+
+    await Promise.all(
+      versions.map(async (version) => {
+        fs.unlink(`${path}${version.suffix}/${id}.jpg`, (err) => {
+          if (err && err.code === "ENOENT") {
+            console.info("Error! File doesn't exist.");
+          } else if (err) {
+            console.error(err);
+          } else {
+            console.info(
+              `Successfully removed file with the path of ${path}/${version.suffix}/${id}.jpg}`,
+            );
+          }
+        });
+      }),
+    );
+
     res.status(200);
   }
+
   res.json();
 });
 

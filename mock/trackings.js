@@ -7,7 +7,7 @@ function randomNumber(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
-const productCodes = ["დეკლარირებული", "სერვის ცენტრში", "გამოგზავნილი"];
+const productCodes = ["awaiting", "warehouse", "send", "arrived", "received"];
 
 const trackings = [...Array(50)].map((_, index) => {
   const setIndex = index;

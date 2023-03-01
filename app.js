@@ -29,9 +29,9 @@ app.set("view engine", "pug");
       "mongoErrLog.log",
     );
   }
-  await db.sequelize.sync({ force: true });
+  await db.sequelize.sync();
   if (process.env.NODE_ENV === "development") {
-    await InsertMockData();
+    // await InsertMockData();
   }
 })();
 
@@ -52,6 +52,7 @@ const scaccountRouter = require("./routes/scaccountRoutes");
 const deliveryRouter = require("./routes/deliveryRoutes");
 const authRouter = require("./routes/authRoutes");
 const clientViewsRouter = require("./routes/clientviewRoutes");
+const scrapingsRouter = require("./routes/scrapingRoutes");
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
@@ -63,6 +64,7 @@ app.use("/scaccounts", scaccountRouter);
 app.use("/deliveries", deliveryRouter);
 app.use("/auth", authRouter);
 app.use("/clientviews", clientViewsRouter);
+app.use("/scrapings", scrapingsRouter);
 
 app.all("*", (req, res) => {
   res.status(404);

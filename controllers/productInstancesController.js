@@ -12,11 +12,7 @@ const getAllProductInstances = asyncHandler(async (req, res) => {
   const { page = 0, limit = 20, orderId } = req.query;
   const offset = page * limit;
 
-  console.log(orderId);
-
   const where = parseFloat(orderId) ? { orderId: parseFloat(orderId) } : {};
-
-  console.log(where);
 
   const productInstances = await ProductInstance.findAndCountAll({
     limit,
@@ -82,7 +78,6 @@ const updateProductInstance = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "productInstance not found" });
   }
 
-  console.log(trackingCode);
   productInstance.ordered = ordered || ordered === "true";
   productInstance.size = size;
   productInstance.color = color;

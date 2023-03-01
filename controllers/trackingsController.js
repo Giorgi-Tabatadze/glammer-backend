@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const {
-  models: { Tracking },
+  models: { Tracking, Scaccount },
 } = require("../models");
 
 // @desc Get all Trackings
@@ -118,9 +118,32 @@ const deleteTracking = asyncHandler(async (req, res) => {
   res.json();
 });
 
+const startTrackingUpdateProcess = asyncHandler(async (req, res) => {
+  const Scaccounts = await Scaccount.findAll({});
+
+  if (!Scaccounts?.length) {
+    return res.status(400).json({ message: "no scaccounts found" });
+  }
+
+  const response = await fetch(`${process.env.SCRAPE_API_DOMAIN}/spacecargo`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      scaccounts: Scaccounts,
+      secretToken: process.env.SCRAPER_SECRET_TOKEN,
+    }),
+  });
+  const data = await response.json();
+
+  res.json(data);
+});
+
 module.exports = {
   getAllTrackings,
   createNewTracking,
   updateTracking,
   deleteTracking,
+  startTrackingUpdateProcess,
 };

@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     declaredFunds: DataTypes.DECIMAL,
     sentDate: DataTypes.DATEONLY,
     estimatedArrival: DataTypes.DATEONLY,
+    arrivedDate: DataTypes.DATEONLY,
   });
   return Tracking;
 };
