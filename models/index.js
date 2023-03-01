@@ -21,7 +21,7 @@ db.models.User = require("./User")(sequelize, Sequelize.DataTypes);
 
 db.models.Order = require("./Order")(sequelize, Sequelize.DataTypes);
 
-db.models.Delivery = require("./Delivery")(sequelize, Sequelize.DataTypes);
+db.models.Delivery = require("./delivery")(sequelize, Sequelize.DataTypes);
 
 db.models.Product = require("./Product")(sequelize, Sequelize.DataTypes);
 db.models.ProductInstance = require("./ProductInstance")(
@@ -30,7 +30,7 @@ db.models.ProductInstance = require("./ProductInstance")(
 );
 
 db.models.Tracking = require("./Tracking")(sequelize, Sequelize.DataTypes);
-db.models.Scaccount = require("./Scaccount")(sequelize, Sequelize.DataTypes);
+db.models.Scaccount = require("./scaccount")(sequelize, Sequelize.DataTypes);
 
 /// / ASSOSIATIONS //////////////////////////////
 
