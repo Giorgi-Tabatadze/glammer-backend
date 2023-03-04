@@ -39,7 +39,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
   const sortingObject = ["id", "DESC"];
   const where = id ? { id: parseFloat(id) } : {};
 
-  const products = await Product.findAll({
+  const products = await Product.findAndCountAll({
     limit,
     offset,
     where,
