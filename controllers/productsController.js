@@ -2,8 +2,28 @@ const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 const sharp = require("sharp");
 const {
+  S3Client,
+  PutObjectCommand,
+  AbortMultipartUploadCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
+const {
   models: { Product },
 } = require("../models");
+
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKey = process.env.AWS_ACCESS_KEY;
+const secretAccessKey = process.env.SECRET_ACCESS_KEY;
+
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: accessKey,
+    secretAccessKey,
+  },
+  region: bucketRegion,
+  endpoint: "https://s3.eu-central-1.amazonaws.com",
+});
 
 const versions = [
   { width: 750, height: 750, suffix: "large" },
@@ -53,13 +73,21 @@ const createNewProduct = asyncHandler(async (req, res, next) => {
   };
   const newProduct = await Product.create(productObject);
 
-  const path = `./public/images/products/`;
-
   await Promise.all(
     versions.map(async (version) => {
-      await sharp(req.file.buffer)
-        .resize(version.width, version.height)
-        .toFile(`${path}/${version.suffix}/${newProduct.id}.jpg`);
+      const buffer = await sharp(req.file.buffer)
+        .resize({ width: version.width, height: version.height })
+        .toFormat("jpg")
+        .toBuffer();
+
+      const params = {
+        Bucket: bucketName,
+        Key: `${newProduct.id}${version.suffix}.jpg`,
+        Body: buffer,
+        ConectType: "image/jpeg",
+      };
+      const command = new PutObjectCommand(params);
+      await s3.send(command);
     }),
   );
 
@@ -101,13 +129,21 @@ const updateProduct = asyncHandler(async (req, res, next) => {
   await product.save();
 
   if (req?.file?.buffer) {
-    const path = `./public/images/products/`;
-
     await Promise.all(
       versions.map(async (version) => {
-        await sharp(req.file.buffer)
-          .resize(version.width, version.height)
-          .toFile(`${path}/${version.suffix}/${product.id}.jpg`);
+        const buffer = await sharp(req.file.buffer)
+          .resize({ width: version.width, height: version.height })
+          .toFormat("jpg")
+          .toBuffer();
+
+        const params = {
+          Bucket: bucketName,
+          Key: `${product.id}${version.suffix}.jpg`,
+          Body: buffer,
+          ConectType: "image/jpeg",
+        };
+        const command = new PutObjectCommand(params);
+        await s3.send(command);
       }),
     );
   }
@@ -133,21 +169,14 @@ const deleteProduct = asyncHandler(async (req, res) => {
   if (!result) {
     res.status(204);
   } else {
-    const path = `public/images/products`;
-
     await Promise.all(
       versions.map(async (version) => {
-        fs.unlink(`${path}${version.suffix}/${id}.jpg`, (err) => {
-          if (err && err.code === "ENOENT") {
-            console.info("Error! File doesn't exist.");
-          } else if (err) {
-            console.error(err);
-          } else {
-            console.info(
-              `Successfully removed file with the path of ${path}/${version.suffix}/${id}.jpg}`,
-            );
-          }
-        });
+        const params = {
+          Bucket: bucketName,
+          Key: `${id}${version.suffix}.jpg`,
+        };
+        const command = new DeleteObjectCommand(params);
+        await s3.send(command);
       }),
     );
 
