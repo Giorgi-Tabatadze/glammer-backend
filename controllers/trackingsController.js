@@ -19,6 +19,14 @@ const getAllTrackings = asyncHandler(async (req, res) => {
   }
   res.json(trackings);
 });
+const getMostRecentlyUpdatedTracking = asyncHandler(async (req, res) => {
+  const tracking = await Tracking.findOne({
+    order: [["updatedAt", "DESC"]], // order by updatedAt in descending order
+    where: {}, // conditions
+  });
+
+  res.json(tracking);
+});
 
 // @desc Create new Tracking
 // @routes POST /trackings
@@ -142,6 +150,7 @@ const startTrackingUpdateProcess = asyncHandler(async (req, res) => {
 
 module.exports = {
   getAllTrackings,
+  getMostRecentlyUpdatedTracking,
   createNewTracking,
   updateTracking,
   deleteTracking,

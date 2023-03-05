@@ -121,11 +121,9 @@ db.models.ProductInstance.belongsTo(db.models.Tracking, {
 // SCACCOUNT has many TRACKINGS
 
 db.models.Scaccount.hasMany(db.models.Tracking, {
-  onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
 db.models.Tracking.belongsTo(db.models.Scaccount, {
-  onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
 
