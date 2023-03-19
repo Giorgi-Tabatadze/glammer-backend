@@ -34,19 +34,25 @@ const versions = [
 // @routes GET /products
 // @access Private
 const getAllProducts = asyncHandler(async (req, res) => {
-  const { page = 0, limit = 20, id } = req.query;
+  const { page = 0, limit = 20 } = req.query;
   const offset = page * limit;
   const sortingObject = ["id", "DESC"];
-  const where = id ? { id: parseFloat(id) } : {};
 
   const products = await Product.findAndCountAll({
     limit,
     offset,
-    where,
     order: [sortingObject], // conditions
   });
 
   res.json(products);
+});
+
+const getProductById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const product = await Product.findByPk(id);
+
+  res.json(product);
 });
 
 // @desc Create new Product
@@ -187,6 +193,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  getProductById,
   getAllProducts,
   createNewProduct,
   updateProduct,

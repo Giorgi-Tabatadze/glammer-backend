@@ -15,4 +15,6 @@ router
   .patch(upload.single("photo"), checkAdmin, productController.updateProduct)
   .delete(checkAdmin, productController.deleteProduct);
 
+router.route("/:id").get(checkAdmin, productController.getProductById);
+
 module.exports = router;

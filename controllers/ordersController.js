@@ -19,17 +19,14 @@ const getAllOrders = asyncHandler(async (req, res) => {
 
   const where = getOrderColumnFilters(columnfilters);
 
-  const orders = await Order.findAndCountAll({
-    distinct: true,
+  const orders = await Order.findAll({
     limit,
     offset,
-    col: `id`,
     where: where.orderWhere,
     include: [
       {
         model: ProductInstance,
-        required: true,
-
+        required: where.productInstanceRequired,
         where: where.productInstanceWhere,
         include: [
           {
@@ -48,7 +45,6 @@ const getAllOrders = asyncHandler(async (req, res) => {
         model: User,
         required: true,
         where: where.userWhere,
-
         include: [
           {
             model: Delivery,
@@ -62,9 +58,51 @@ const getAllOrders = asyncHandler(async (req, res) => {
       },
     ],
     order: [sortingObject],
+    subQuery: false,
   });
 
-  res.json(orders);
+  const orderCount = await Order.count({
+    distinct: true,
+    col: `id`,
+    where: where.orderWhere,
+    include: [
+      {
+        model: ProductInstance,
+        required: where.productInstanceRequired,
+        where: where.productInstanceWhere,
+        include: [
+          {
+            model: Tracking,
+            required: where.trackingRequired,
+            where: where.trackingWhere,
+          },
+          {
+            model: Product,
+            required: where.productRequired,
+            where: where.productWhere,
+          },
+        ],
+      },
+      {
+        model: User,
+        required: true,
+        where: where.userWhere,
+        include: [
+          {
+            model: Delivery,
+            required: false,
+          },
+        ],
+      },
+      {
+        model: Delivery,
+        required: false,
+      },
+    ],
+    subQuery: false,
+  });
+
+  res.json({ rows: orders, count: orderCount });
 });
 
 // @desc Create new Order
